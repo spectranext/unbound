@@ -40,6 +40,12 @@ def validate_port(value: str) -> str:
     return value
 
 
+def validate_positive_int(value: str) -> str:
+    if not value.isdigit() or int(value) <= 0:
+        raise ValueError("value must be a positive integer")
+    return value
+
+
 def validate_single_arg(value: str) -> str:
     if not value or re.search(r"\s", value):
         raise ValueError("value must be a single non-empty argument")
@@ -88,6 +94,14 @@ SCENARIO_FIELD = Field(
     input_key="SCENARIO",
     default="default",
     validate=validate_single_arg,
+)
+
+MAP_WIDTH_FIELD = Field(
+    "MAP_WIDTH",
+    "Specify world width in chunks (8 blocks, default 64 chunks)",
+    input_key="MAP_WIDTH",
+    default="64",
+    validate=validate_positive_int,
 )
 
 
@@ -162,8 +176,8 @@ def update_lines(lines: list[str], updates: dict[str, str]) -> list[str]:
     return result
 
 
-def build_args(scenario: str) -> str:
-    return f"--scenario {scenario} --dont-save-map"
+def build_args(scenario: str, map_width: str) -> str:
+    return f"--scenario {scenario} --map-width {map_width} --dont-save-map"
 
 
 def main() -> int:
@@ -194,7 +208,8 @@ def main() -> int:
 
     if not values.get("ZX_SERVER_ARGS") or args.force:
         scenario = prompt_value(SCENARIO_FIELD, SCENARIO_FIELD.existing_or_default(values))
-        updates["ZX_SERVER_ARGS"] = build_args(scenario)
+        map_width = prompt_value(MAP_WIDTH_FIELD, MAP_WIDTH_FIELD.existing_or_default(values))
+        updates["ZX_SERVER_ARGS"] = build_args(scenario, map_width)
 
     if not updates:
         print(f"{env_path} already contains the unbound configuration.")
