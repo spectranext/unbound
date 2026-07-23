@@ -73,6 +73,13 @@ ENV_FIELDS = (
         required=True,
         validate=validate_required,
     ),
+    Field(
+        "REPORT_PORT",
+        "Server port",
+        input_key="PORT",
+        default="13390",
+        validate=validate_port,
+    ),
 )
 
 SCENARIO_FIELD = Field(

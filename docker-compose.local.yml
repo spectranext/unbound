@@ -1,0 +1,57 @@
+services:
+  redis:
+    image: redis:latest
+    container_name: unbound_local_redis
+    restart: always
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.server-browser-api
+    container_name: unbound_local_api
+    restart: always
+    environment:
+      REDIS_HOST: redis
+    volumes:
+      - statuses:/runtime/statuses
+    depends_on:
+      - redis
+
+  tnfs:
+    build:
+      context: .
+      dockerfile: Dockerfile.server-browser
+    container_name: unbound_local_tnfs
+    restart: always
+    volumes:
+      - statuses:/statuses
+    ports:
+      - 16384:16384/udp
+    depends_on:
+      - api
+
+  game:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: unbound_local_game
+    restart: always
+    env_file:
+      - .env
+    environment:
+      REPORT_URL: http://api:5000
+      REPORT_ADDRESS: ${REPORT_ADDRESS:?Run 'make configure' before starting the local stack}
+      REPORT_ICON: ${REPORT_ICON:?Run 'make configure' before starting the local stack}
+      REPORT_ICON_COLOR: ${REPORT_ICON_COLOR:?Run 'make configure' before starting the local stack}
+      REPORT_NAME: ${REPORT_NAME:?Run 'make configure' before starting the local stack}
+      REPORT_PORT: ${REPORT_PORT:?Run 'make configure' before starting the local stack}
+      ZX_SERVER_ARGS: ${ZX_SERVER_ARGS:?Run 'make configure' before starting the local stack}
+      API_SERVER: http://api:5000
+    ports:
+      - 13390:13390
+    depends_on:
+      - api
+      - tnfs
+
+volumes:
+  statuses:

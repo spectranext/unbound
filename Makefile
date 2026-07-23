@@ -22,6 +22,15 @@ server-api@up:
 server-api@down:
 	docker compose -f server-api.yml down
 
+local: configure
+	docker compose -f docker-compose.local.yml up --build
+
+local@up: configure
+	docker compose -f docker-compose.local.yml up --build -d
+
+local@down:
+	docker compose -f docker-compose.local.yml down
+
 .PHONY: unbound
 .PHONY: configure
 .PHONY: unbound@build
@@ -29,3 +38,6 @@ server-api@down:
 .PHONY: server-api
 .PHONY: server-api@up
 .PHONY: server-api@down
+.PHONY: local
+.PHONY: local@up
+.PHONY: local@down

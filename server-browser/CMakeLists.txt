@@ -36,7 +36,7 @@ target_compile_definitions(game_loader PUBLIC -D__SPECTRUM)
 target_link_directories(game_loader PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../client/libs")
 target_link_options(game_loader PUBLIC -startup=31 -zorg=4096 --no-crt -m ${CLIENT_PRAGMAS})
 
-target_link_libraries(game_loader PUBLIC libspectranet_np.lib libsocket_np.lib)
+target_link_libraries(game_loader PUBLIC libspectranet_np libsocket_np)
 
 add_dependencies(game_loader channels_proto channels_proto_asm)
 target_link_libraries(game_loader PUBLIC channels_proto channels_proto_asm)
@@ -59,14 +59,14 @@ add_executable(server_browser_debug ${CLIENT_ASM_SOURCES} ${CLIENT_C_SOURCES} "$
 target_compile_definitions(server_browser_debug PUBLIC -D__SPECTRUM -DSERVERS_DEBUG)
 target_link_directories(server_browser_debug PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../client/libs")
 target_link_options(server_browser_debug PUBLIC -startup=31 -zorg=29000 -create-app -m ${CLIENT_PRAGMAS})
-target_link_libraries(server_browser_debug PUBLIC  libspectranet_np.lib ${ZXGUI_LIBRARIES})
+target_link_libraries(server_browser_debug PUBLIC  libspectranet_np ${ZXGUI_LIBRARIES})
 add_dependencies(server_browser_debug game_loader_map_link)
 
 add_executable(server_browser ${CLIENT_ASM_SOURCES} ${CLIENT_C_SOURCES} "${CMAKE_CURRENT_SOURCE_DIR}/game_loader.asm")
 target_compile_definitions(server_browser PUBLIC -D__SPECTRUM)
 target_link_directories(server_browser PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../client/libs")
 target_link_options(server_browser PUBLIC -startup=31 -zorg=29000 -create-app -m ${CLIENT_PRAGMAS})
-target_link_libraries(server_browser PUBLIC  libspectranet_np.lib ${ZXGUI_LIBRARIES})
+target_link_libraries(server_browser PUBLIC  libspectranet_np ${ZXGUI_LIBRARIES})
 add_dependencies(server_browser game_loader_map_link)
 
 spectranext_set_boot("

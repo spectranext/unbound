@@ -45,7 +45,27 @@ The intended rhythm is asynchronous and practical: join the world, inspect what 
 
 ## Starting the Server
 
-Install Docker, then start Unbound in the foreground:
+Install Docker (with Docker Compose), then start Unbound in the foreground:
+
+To run a fully local stack with the game server:
+
+```sh
+make local@up
+```
+
+This exposes the game on TCP `13390`, TNFS on UDP `16384`. The TNFS service hosts the server browser; 
+
+To stop the local stack:
+
+```sh
+make local@down
+```
+
+To reconfigure an existing `.env`, run:
+
+```sh
+python3 tools/configure_env.py --force
+```
 
 ```sh
 make unbound
@@ -57,10 +77,4 @@ To run it as a background daemon instead:
 
 ```sh
 make unbound@daemon
-```
-
-To reconfigure an existing `.env`, run:
-
-```sh
-python3 tools/configure_env.py --force
 ```

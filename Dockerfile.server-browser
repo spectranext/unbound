@@ -25,6 +25,7 @@ COPY server-browser/loader /build/server-browser/loader
 COPY server-browser/data /build/server-browser/data
 COPY server-browser/progress_bar.bin /build/server-browser/progress_bar.bin
 COPY client/gui /build/client/gui
+COPY client/libs /build/client/libs
 COPY client/tools /build/client/tools
 COPY tnfsd /build/tnfsd
 RUN touch /build/server-browser/game_loader.asm
