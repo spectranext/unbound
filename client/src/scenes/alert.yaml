@@ -1,0 +1,24 @@
+version: 1
+scenes:
+  scene:
+    - name: alert_text
+      type: label
+      boundaries: 5, 9, 24, 4
+      buffer: alert_text_data
+      buffer_size: 64
+      color: INK_YELLOW | BRIGHT | PAPER_BLACK
+      flags: GUI_FLAG_MULTILINE
+    - name: connect_btn
+      type: button
+      boundaries: 8, 14, 8, 1
+      key: 13
+      icon: GUI_ICON_RETURN
+      title: "Reconnect"
+      callback: alert_connect
+    - name: restart_btn
+      type: button
+      boundaries: 18, 14, 8, 1
+      key: 32
+      icon: GUI_ICON_SPACE
+      title: "Restart"
+      callback: alert_restart

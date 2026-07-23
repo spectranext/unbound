@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Black">
+    <option name="sdkName" value="Python 3.11" />
+  </component>
+  <component name="CMakePythonSetting">
+    <option name="pythonIntegrationState" value="NO" />
+  </component>
+  <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
+  <component name="CidrRootsConfiguration">
+    <sourceRoots>
+      <file path="$PROJECT_DIR$/modules" />
+      <file path="$PROJECT_DIR$/src" />
+      <file path="$PROJECT_DIR$/srcnd" />
+      <file path="$PROJECT_DIR$/../common/proto/src" />
+      <file path="$PROJECT_DIR$/../common/src" />
+    </sourceRoots>
+  </component>
+</project>

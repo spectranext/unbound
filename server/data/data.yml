@@ -1,0 +1,153 @@
+data:
+  - type: png2c
+    name: tiles
+    hex: true
+    dump-color: true
+    preferred-bg: black
+    preferred-fg: bright-white
+  - type: png2c
+    name: char1_moving.png
+    id: char1mov
+    pre-shift: true
+    hex: true
+    extra:
+      PRESHIFTED: 1
+    preferred-bg: black
+  - type: png2c
+    name: char1_picking.png
+    id: char1pck
+    full-row: true
+    hex: true
+    preferred-bg: black
+  - type: png2c
+    name: slime_moving.png
+    id: slimemov
+    pre-shift: true
+    hex: true
+    extra:
+      PRESHIFTED: 1
+    preferred-bg: black
+  - type: png2c
+    name: spider_moving.png
+    id: spdmov
+    pre-shift: true
+    hex: true
+    extra:
+      PRESHIFTED: 1
+    preferred-bg: black
+  - type: png2c
+    name: bot_moving.png
+    id: botmov
+    pre-shift: true
+    hex: true
+    extra:
+      PRESHIFTED: 1
+    preferred-bg: black
+  - type: png2c
+    name: char1
+    id: char1
+    full-row: true
+    hex: true
+    preferred-bg: black
+  - type: png2c
+    name: char2
+    id: char2
+    full-row: true
+    hex: true
+    preferred-bg: black
+  - type: png2c
+    name: slime
+    id: slime
+    full-row: true
+    hex: true
+    preferred-bg: black
+  - type: png2c
+    name: spider
+    id: spider
+    full-row: true
+    hex: true
+    preferred-bg: black
+  - type: png2c
+    name: bot
+    id: bot
+    full-row: true
+    hex: true
+    preferred-bg: black
+  - type: png2c
+    name: effects/explosion.png
+    id: expl
+    full-row: true
+    hex: true
+    extra:
+      FRAMES: 8
+      SND: 5
+      RATE: 2
+      MOTION: 0
+    preferred-bg: black
+  - type: png2c
+    name: effects/fire1.png
+    id: fire1
+    full-row: true
+    hex: true
+    extra:
+      FRAMES: 1
+      RATE: 2
+      MOTION: 0
+    preferred-bg: black
+  - type: png2c
+    name: effects/fire2.png
+    id: fire2
+    full-row: true
+    hex: true
+    extra:
+      FRAMES: 1
+      RATE: 2
+      MOTION: 0
+    preferred-bg: black
+  - type: png2c
+    name: effects/fire3.png
+    id: fire3
+    full-row: true
+    hex: true
+    extra:
+      FRAMES: 1
+      RATE: 2
+      MOTION: 0
+    preferred-bg: black
+  - type: png2c
+    name: effects/sword_right.png
+    id: swordr
+    full-row: true
+    hex: true
+    extra:
+      FRAMES: 5
+      SND: 1
+      RATE: 2
+      MOTION: 0
+    preferred-bg: black
+  - type: png2c
+    name: effects/sword_left.png
+    id: swordl
+    full-row: true
+    hex: true
+    extra:
+      FRAMES: 5
+      SND: 0
+      RATE: 2
+      MOTION: 0
+    preferred-bg: black
+  - type: png2c
+    name: particles/rocket.png
+    id: rock
+    full-row: true
+    hex: true
+    preferred-bg: black
+  - type: png2c
+    name: ship/ship.png
+    id: ship1
+    full-row: true
+    hex: true
+    pre-shift: true
+    extra:
+      PRESHIFTED: 1
+    preferred-bg: black

@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ server_title }} - {{ team.name }}</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #16181c;
+            --panel: #20242a;
+            --panel-alt: #252a31;
+            --border: #313741;
+            --text: #e7eaee;
+            --muted: #98a2b3;
+            --accent: #6f8fb8;
+            --accent-strong: #87a5cb;
+            --input: #1b1f25;
+            --danger: #d16060;
+            --success: #5ca870;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font: 13px Inter, "Segoe UI", Arial, sans-serif;
+        }
+
+        .page {
+            max-width: 1160px;
+            min-height: 100vh;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .window {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .titlebar {
+            padding: 8px 12px;
+            background: var(--panel-alt);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .title {
+            color: var(--accent-strong);
+            font-weight: 600;
+        }
+
+        .window-body {
+            padding: 12px;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.95fr);
+            gap: 16px;
+        }
+
+        .meta {
+            margin-bottom: 12px;
+        }
+
+        .stack {
+            display: grid;
+            gap: 16px;
+            align-content: start;
+        }
+
+        .subwindow {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .subwindow-title {
+            padding: 8px 12px;
+            background: var(--panel-alt);
+            border-bottom: 1px solid var(--border);
+            color: var(--accent-strong);
+            font-weight: 600;
+        }
+
+        .subwindow-body {
+            padding: 12px;
+        }
+
+        .label {
+            color: var(--muted);
+            font-size: 11px;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+        }
+
+        .button, button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 28px;
+            padding: 4px 8px;
+            color: var(--text);
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .button:hover, button:hover {
+            border-color: var(--accent);
+            color: var(--accent-strong);
+        }
+
+        .pathbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .crumb {
+            padding: 0;
+            color: var(--muted);
+            background: transparent;
+            border: 0;
+            cursor: pointer;
+        }
+
+        .crumb:hover {
+            color: var(--accent-strong);
+        }
+
+        .pane {
+            position: relative;
+            min-height: 360px;
+            background: var(--input);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: visible;
+        }
+
+        .pane.drag-active {
+            border-color: var(--accent);
+            box-shadow: inset 0 0 0 1px var(--accent);
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 360px;
+            color: var(--muted);
+        }
+
+        .drop-overlay {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(27, 31, 37, 0.88);
+            color: var(--accent-strong);
+            font-weight: 600;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .pane.drag-active .drop-overlay {
+            display: flex;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        th {
+            background: var(--panel-alt);
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .name-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0;
+            min-height: 0;
+            color: var(--text);
+            background: transparent;
+            border: 0;
+            cursor: pointer;
+        }
+
+        .name-button:hover {
+            color: var(--accent-strong);
+        }
+
+        .entry-name {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .entry-icon {
+            position: relative;
+            display: inline-block;
+            flex: 0 0 auto;
+        }
+
+        .entry-icon-folder {
+            width: 14px;
+            height: 10px;
+            margin-top: 2px;
+            background: #8f7a42;
+            border: 1px solid #b9a166;
+            border-radius: 2px;
+        }
+
+        .entry-icon-folder::before {
+            content: "";
+            position: absolute;
+            left: 1px;
+            top: -4px;
+            width: 7px;
+            height: 4px;
+            background: #a48c4f;
+            border: 1px solid #b9a166;
+            border-bottom: 0;
+            border-radius: 2px 2px 0 0;
+        }
+
+        .entry-icon-file {
+            width: 12px;
+            height: 14px;
+            background: #596273;
+            border: 1px solid #8b96aa;
+            border-radius: 2px;
+        }
+
+        .entry-icon-file::before {
+            content: "";
+            position: absolute;
+            right: -1px;
+            top: -1px;
+            width: 5px;
+            height: 5px;
+            background: var(--panel-alt);
+            border-left: 1px solid #8b96aa;
+            border-bottom: 1px solid #8b96aa;
+            transform: skew(-25deg, -25deg);
+            transform-origin: top right;
+        }
+
+        .actions-bar {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .entry-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .action-menu {
+            position: relative;
+        }
+
+        .action-menu-trigger {
+            width: 24px;
+            height: 24px;
+            min-height: 24px;
+            padding: 0;
+            color: var(--muted);
+        }
+
+        .action-menu-trigger[aria-expanded="true"] {
+            border-color: var(--accent);
+            color: var(--accent-strong);
+        }
+
+        .action-menu-popover {
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 0;
+            z-index: 5;
+            display: none;
+            min-width: 112px;
+            padding: 4px;
+            background: var(--panel-alt);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+        }
+
+        .action-menu.open .action-menu-popover {
+            display: grid;
+        }
+
+        .action-menu-item {
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            min-height: 26px;
+            padding: 4px 8px;
+            color: var(--text);
+            background: transparent;
+            border: 0;
+            border-radius: 3px;
+            font: inherit;
+            text-align: left;
+        }
+
+        .action-menu-item:hover {
+            background: var(--input);
+            color: var(--accent-strong);
+        }
+
+        .action-menu-item-danger:hover {
+            color: #ffb1b1;
+        }
+
+        .action-icon {
+            width: 14px;
+            height: 14px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .status {
+            margin-top: 12px;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--panel-alt);
+            color: var(--muted);
+        }
+
+        .status.success {
+            border-color: var(--success);
+            color: #d7f0dd;
+        }
+
+        .status.error {
+            border-color: var(--danger);
+            color: #ffdede;
+        }
+
+        .stats-value {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .computer-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .computer-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 12px;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .computer-row:last-child {
+            padding-bottom: 0;
+            border-bottom: 0;
+        }
+
+        .computer-name {
+            font-weight: 600;
+        }
+
+        .computer-state {
+            margin-top: 2px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <div class="layout">
+        <section class="window">
+            <div class="titlebar">
+                <div class="title">Team Files</div>
+            </div>
+            <div class="window-body">
+                <div class="meta">
+                    <div class="label">Team</div>
+                    <div>{{ team.name }}</div>
+                </div>
+
+                <div id="pathbar" class="pathbar"></div>
+
+                <div id="pane" class="pane">
+                    <div class="drop-overlay">Drop file to upload</div>
+                    <div id="loading" class="loading">Loading...</div>
+                    <table id="files-table" style="display: none;">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Size</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="entries"></tbody>
+                    </table>
+                </div>
+
+                <div class="actions-bar">
+                    <button id="upload-button" type="button">Upload</button>
+                    <button id="mkdir-button" type="button">New Folder</button>
+                    <input id="upload-file" type="file" hidden>
+                </div>
+
+                <div id="status" class="status">Connecting...</div>
+            </div>
+        </section>
+
+        <aside class="stack">
+            <section class="subwindow">
+                <div class="subwindow-title">Statistics</div>
+                <div class="subwindow-body">
+                    <div class="label">Current Credits</div>
+                    <div class="stats-value">{{ credits }}</div>
+                </div>
+            </section>
+
+            <section class="subwindow">
+                <div class="subwindow-title">Computers</div>
+                <div class="subwindow-body">
+                    <div class="computer-list">
+                        {% for computer in computers %}
+                        <div class="computer-row">
+                            <div>
+                                <div class="computer-name">{{ computer.name }}</div>
+                                <div class="computer-state">{{ "Powered on" if computer.powered_on else "Powered off" }}</div>
+                            </div>
+                            <a class="button" href="{{ computer.manage_url }}">manage</a>
+                        </div>
+                        {% endfor %}
+                        {% if not computers %}
+                        <div class="computer-state">No computers for this team.</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="subwindow">
+                <div class="subwindow-title">Actions</div>
+                <div class="subwindow-body">
+                    <a class="button" href="{{ chat_url }}">Chat</a>
+                </div>
+            </section>
+        </aside>
+    </div>
+</main>
+<script>
+const pathbarEl = document.getElementById("pathbar");
+const entriesEl = document.getElementById("entries");
+const statusEl = document.getElementById("status");
+const paneEl = document.getElementById("pane");
+const loadingEl = document.getElementById("loading");
+const filesTableEl = document.getElementById("files-table");
+const uploadButtonEl = document.getElementById("upload-button");
+const uploadFileEl = document.getElementById("upload-file");
+const mkdirButtonEl = document.getElementById("mkdir-button");
+
+let currentPath = "";
+let dragDepth = 0;
+let openActionMenu = null;
+
+function websocketUrl() {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    return `${protocol}//${window.location.host}${window.location.pathname}${window.location.search}`;
+}
+
+function setStatus(kind, text) {
+    statusEl.className = kind ? `status ${kind}` : "status";
+    statusEl.textContent = text;
+}
+
+function setFilesLoaded(loaded) {
+    loadingEl.style.display = loaded ? "none" : "flex";
+    filesTableEl.style.display = loaded ? "table" : "none";
+}
+
+function setDragActive(active) {
+    paneEl.classList.toggle("drag-active", active);
+}
+
+function uploadFile(file) {
+    if (!file || ws.readyState !== WebSocket.OPEN) {
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+        const result = String(reader.result || "");
+        const contentBase64 = result.includes(",") ? result.split(",", 2)[1] : "";
+        setFilesLoaded(false);
+        ws.send(JSON.stringify({
+            type: "upload",
+            name: file.name,
+            content_base64: contentBase64,
+        }));
+        uploadFileEl.value = "";
+    };
+    reader.readAsDataURL(file);
+}
+
+function formatSize(value) {
+    if (value === null || value === undefined) {
+        return "-";
+    }
+    if (value < 1024) {
+        return `${value} B`;
+    }
+    if (value < 1024 * 1024) {
+        return `${(value / 1024).toFixed(1)} KB`;
+    }
+    return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function requestRefresh(path) {
+    if (ws.readyState !== WebSocket.OPEN) {
+        return;
+    }
+    setFilesLoaded(false);
+    ws.send(JSON.stringify({
+        type: "refresh",
+        path,
+    }));
+}
+
+function requestDownload(path) {
+    if (ws.readyState !== WebSocket.OPEN) {
+        return;
+    }
+    ws.send(JSON.stringify({
+        type: "download",
+        path,
+    }));
+}
+
+function triggerDownload(name, contentBase64) {
+    const link = document.createElement("a");
+    link.href = `data:application/octet-stream;base64,${contentBase64}`;
+    link.download = name;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+}
+
+function createSvgIcon(paths) {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("class", "action-icon");
+    svg.setAttribute("viewBox", "0 0 16 16");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("focusable", "false");
+
+    for (const pathData of paths) {
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", pathData);
+        svg.appendChild(path);
+    }
+
+    return svg;
+}
+
+function closeActionMenu() {
+    if (!openActionMenu) {
+        return;
+    }
+
+    openActionMenu.classList.remove("open");
+    const trigger = openActionMenu.querySelector(".action-menu-trigger");
+    if (trigger) {
+        trigger.setAttribute("aria-expanded", "false");
+    }
+    openActionMenu = null;
+}
+
+function toggleActionMenu(menu) {
+    const shouldOpen = openActionMenu !== menu;
+    closeActionMenu();
+
+    if (!shouldOpen) {
+        return;
+    }
+
+    menu.classList.add("open");
+    const trigger = menu.querySelector(".action-menu-trigger");
+    if (trigger) {
+        trigger.setAttribute("aria-expanded", "true");
+    }
+    openActionMenu = menu;
+}
+
+function renameEntry(entry) {
+    const newName = window.prompt("Rename to:", entry.name);
+    if (!newName || ws.readyState !== WebSocket.OPEN) {
+        return;
+    }
+    setFilesLoaded(false);
+    ws.send(JSON.stringify({
+        type: "rename",
+        path: entry.path,
+        new_name: newName,
+    }));
+}
+
+function deleteEntry(entry) {
+    if (!window.confirm(`Delete ${entry.name}?`)) {
+        return;
+    }
+    if (ws.readyState !== WebSocket.OPEN) {
+        return;
+    }
+    setFilesLoaded(false);
+    ws.send(JSON.stringify({
+        type: "delete",
+        path: entry.path,
+    }));
+}
+
+function createMenuItem(label, onSelect, danger = false) {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = `action-menu-item${danger ? " action-menu-item-danger" : ""}`;
+    item.setAttribute("role", "menuitem");
+    item.textContent = label;
+    item.addEventListener("click", () => {
+        closeActionMenu();
+        onSelect();
+    });
+    return item;
+}
+
+function createActionMenu(entry) {
+    const menu = document.createElement("div");
+    menu.className = "action-menu";
+
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "action-menu-trigger";
+    trigger.title = "Actions";
+    trigger.setAttribute("aria-label", `Actions for ${entry.name}`);
+    trigger.setAttribute("aria-haspopup", "menu");
+    trigger.setAttribute("aria-expanded", "false");
+    trigger.appendChild(createSvgIcon([
+        "M4 6l4 4 4-4",
+    ]));
+    trigger.addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleActionMenu(menu);
+    });
+    menu.appendChild(trigger);
+
+    const popover = document.createElement("div");
+    popover.className = "action-menu-popover";
+    popover.setAttribute("role", "menu");
+    popover.addEventListener("click", (event) => event.stopPropagation());
+    popover.appendChild(createMenuItem("Rename", () => renameEntry(entry)));
+
+    if (entry.kind === "file") {
+        popover.appendChild(createMenuItem("Download", () => requestDownload(entry.path)));
+    }
+
+    popover.appendChild(createMenuItem("Delete", () => deleteEntry(entry), true));
+    menu.appendChild(popover);
+
+    return menu;
+}
+
+function renderPathbar(breadcrumbs, parentPath) {
+    pathbarEl.textContent = "";
+
+    if (parentPath !== null && parentPath !== undefined) {
+        const up = document.createElement("button");
+        up.className = "crumb";
+        up.textContent = "..";
+        up.addEventListener("click", () => requestRefresh(parentPath));
+        pathbarEl.appendChild(up);
+    }
+
+    for (const crumb of breadcrumbs || []) {
+        const button = document.createElement("button");
+        button.className = "crumb";
+        button.textContent = crumb.name;
+        button.addEventListener("click", () => requestRefresh(crumb.path));
+        pathbarEl.appendChild(button);
+    }
+}
+
+function renderEntries(entries) {
+    closeActionMenu();
+    entriesEl.textContent = "";
+
+    for (const entry of entries || []) {
+        const row = document.createElement("tr");
+
+        const nameCell = document.createElement("td");
+        const nameContent = document.createElement("span");
+        nameContent.className = "entry-name";
+
+        const icon = document.createElement("span");
+        icon.className = `entry-icon ${entry.kind === "dir" ? "entry-icon-folder" : "entry-icon-file"}`;
+        nameContent.appendChild(icon);
+
+        if (entry.kind === "dir") {
+            const button = document.createElement("button");
+            button.className = "name-button";
+            const label = document.createElement("span");
+            label.textContent = entry.name;
+            button.appendChild(nameContent);
+            button.appendChild(label);
+            button.addEventListener("click", () => requestRefresh(entry.path));
+            nameCell.appendChild(button);
+        } else {
+            const label = document.createElement("span");
+            label.textContent = entry.name;
+            nameContent.appendChild(label);
+            nameCell.appendChild(nameContent);
+        }
+        row.appendChild(nameCell);
+
+        const typeCell = document.createElement("td");
+        typeCell.textContent = entry.kind;
+        row.appendChild(typeCell);
+
+        const sizeCell = document.createElement("td");
+        sizeCell.textContent = formatSize(entry.size);
+        row.appendChild(sizeCell);
+
+        const actionsCell = document.createElement("td");
+        const actions = document.createElement("div");
+        actions.className = "entry-actions";
+        actions.appendChild(createActionMenu(entry));
+
+        actionsCell.appendChild(actions);
+        row.appendChild(actionsCell);
+        entriesEl.appendChild(row);
+    }
+}
+
+function handleMessage(message) {
+    if (!message || typeof message !== "object") {
+        return;
+    }
+
+    if (message.type === "state") {
+        currentPath = message.current_path || "";
+        setFilesLoaded(true);
+        renderPathbar(message.breadcrumbs, message.parent_path);
+        renderEntries(message.entries);
+        setStatus("success", `Ready${currentPath ? `: /${currentPath}` : ""}`);
+        return;
+    }
+
+    if (message.type === "status") {
+        setStatus(message.kind || "", message.text || "");
+        return;
+    }
+
+    if (message.type === "download") {
+        triggerDownload(message.name || "download.bin", message.content_base64 || "");
+    }
+}
+
+const ws = new WebSocket(websocketUrl());
+
+ws.addEventListener("open", () => {
+    setStatus("", "Connected");
+});
+
+ws.addEventListener("close", () => {
+    setStatus("error", "Disconnected");
+});
+
+ws.addEventListener("error", () => {
+    setStatus("error", "Connection error");
+});
+
+ws.addEventListener("message", async (event) => {
+    try {
+        handleMessage(JSON.parse(event.data));
+    } catch (error) {
+        setStatus("error", "Invalid server message");
+    }
+});
+
+uploadButtonEl.addEventListener("click", () => {
+    uploadFileEl.click();
+});
+
+uploadFileEl.addEventListener("change", () => {
+    uploadFile(uploadFileEl.files[0]);
+});
+
+mkdirButtonEl.addEventListener("click", () => {
+    const name = window.prompt("New folder name:");
+    if (!name || ws.readyState !== WebSocket.OPEN) {
+        return;
+    }
+    setFilesLoaded(false);
+    ws.send(JSON.stringify({
+        type: "mkdir",
+        name,
+    }));
+});
+
+document.addEventListener("click", closeActionMenu);
+
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+        closeActionMenu();
+    }
+});
+
+paneEl.addEventListener("dragenter", (event) => {
+    event.preventDefault();
+    dragDepth += 1;
+    setDragActive(true);
+});
+
+paneEl.addEventListener("dragover", (event) => {
+    event.preventDefault();
+    if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = "copy";
+    }
+    setDragActive(true);
+});
+
+paneEl.addEventListener("dragleave", (event) => {
+    event.preventDefault();
+    dragDepth = Math.max(0, dragDepth - 1);
+    if (dragDepth === 0) {
+        setDragActive(false);
+    }
+});
+
+paneEl.addEventListener("drop", (event) => {
+    event.preventDefault();
+    dragDepth = 0;
+    setDragActive(false);
+    const file = event.dataTransfer && event.dataTransfer.files ? event.dataTransfer.files[0] : null;
+    uploadFile(file);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+
+$5B00       23296           stack_top
+...                         ^
+...                         |
+$5FFF       24575           stack
+
+$61A8       25000           program
+
+
+
+
+5fb1

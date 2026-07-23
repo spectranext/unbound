@@ -1,0 +1,38 @@
+version: '3'
+services:
+  tnfs:
+    build:
+      dockerfile: Dockerfile.server-browser
+      context: .
+    container_name: tnfs
+    restart: always
+    volumes:
+      - "statuses:/statuses"
+    ports:
+      - 16384:16384/udp
+    command:
+      - /sandbox/tnfsd/tnfsd
+      - /sandbox/tnfsd/data
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.server-browser-api
+    environment:
+      REDIS_HOST: "redis"
+    volumes:
+      - "statuses:/runtime/statuses"
+    ports:
+      - 5000:5000
+    depends_on:
+      - redis
+  redis:
+    image: redis:latest
+
+
+networks:
+  tnfs:
+    # docker network create --subnet 172.20.20.0/24 tnfs
+    external: true
+
+volumes:
+  statuses:

@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ server_title }} - {{ computer_name }}</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #16181c;
+            --panel: #20242a;
+            --panel-alt: #252a31;
+            --border: #313741;
+            --text: #e7eaee;
+            --muted: #98a2b3;
+            --accent: #6f8fb8;
+            --accent-strong: #87a5cb;
+            --success: #5ca870;
+            --screen-bg: #0b0c10;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font: 13px Inter, "Segoe UI", Arial, sans-serif;
+        }
+
+        .page {
+            max-width: 1320px;
+            min-height: 100vh;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(720px, 1.7fr) minmax(280px, 0.75fr);
+            gap: 16px;
+        }
+
+        .window {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .titlebar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 12px;
+            background: var(--panel-alt);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .title {
+            color: var(--accent-strong);
+            font-weight: 600;
+        }
+
+        .window-body {
+            padding: 12px;
+        }
+
+        .stack {
+            display: grid;
+            gap: 16px;
+            align-content: start;
+        }
+
+        .label {
+            color: var(--muted);
+            font-size: 11px;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+        }
+
+        .meta {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .state {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .status {
+            margin-bottom: 16px;
+            padding: 10px 12px;
+            border: 1px solid var(--success);
+            border-radius: 4px;
+            color: #d7f0dd;
+            background: var(--panel-alt);
+        }
+
+        .status.error {
+            border-color: #d16060;
+            color: #ffdede;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 28px;
+            padding: 4px 8px;
+            color: var(--text);
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            border-color: var(--accent);
+            color: var(--accent-strong);
+        }
+
+        .screen-shell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 420px;
+            padding: 16px;
+            background: var(--screen-bg);
+        }
+
+        .screen-frame {
+            padding: 18px;
+            background: #050607;
+            border: 1px solid #1b1f25;
+            border-radius: 4px;
+        }
+
+        canvas {
+            display: block;
+            width: 640px;
+            height: 512px;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            background: #000;
+            outline: none;
+        }
+
+        .screen-meta {
+            margin-top: 12px;
+            color: var(--muted);
+        }
+
+        .live {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #7a3131;
+        }
+
+        .live.connected .live-dot {
+            background: var(--success);
+        }
+
+        .logs {
+            min-height: 220px;
+            max-height: 320px;
+            overflow: auto;
+            padding: 10px 12px;
+            background: #111419;
+            color: #d7f0dd;
+            font: 12px/1.4 "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <div class="layout">
+        <section class="window">
+            <div class="titlebar">
+                <div class="title">Screen</div>
+                <div id="live" class="live">
+                    <span class="live-dot"></span>
+                    <span id="live-label">Disconnected</span>
+                </div>
+            </div>
+            <div class="window-body">
+                <div class="screen-shell">
+                    <div class="screen-frame">
+                        <canvas id="screen" width="320" height="256" tabindex="0"></canvas>
+                    </div>
+                </div>
+                <div id="screen-meta" class="screen-meta">Waiting for frames...</div>
+            </div>
+        </section>
+
+        <aside class="stack">
+            <section class="window">
+                <div class="titlebar">
+                    <div class="title">Manage</div>
+                </div>
+                <div class="window-body">
+                    {% if status %}
+                    <div id="action-status" class="status">{{ status }}</div>
+                    {% else %}
+                    <div id="action-status" class="status" style="display: none;"></div>
+                    {% endif %}
+
+                    <div class="meta">
+                        <div>
+                            <div class="label">Team</div>
+                            <div>{{ team.name }}</div>
+                        </div>
+                        <div>
+                            <div class="label">Computer</div>
+                            <div>{{ computer_name }}</div>
+                        </div>
+                        <div>
+                            <div class="label">Power</div>
+                            <div id="power-state" class="state">{{ "Powered on" if powered_on else "Powered off" }}</div>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        {% for action in actions %}
+                        <a class="button" href="{{ action.href }}">{{ action.label }}</a>
+                        {% endfor %}
+                        <button id="upload-button" type="button">Upload File</button>
+                        <input id="upload-file" type="file" hidden>
+                    </div>
+                </div>
+            </section>
+
+            <section class="window">
+                <div class="titlebar">
+                    <div class="title">Logs</div>
+                </div>
+                <div id="logs" class="logs"></div>
+            </section>
+        </aside>
+    </div>
+</main>
+<script>
+const canvas = document.getElementById("screen");
+const ctx = canvas.getContext("2d");
+const imageData = ctx.createImageData(320, 256);
+const screenMetaEl = document.getElementById("screen-meta");
+const powerStateEl = document.getElementById("power-state");
+const liveEl = document.getElementById("live");
+const liveLabelEl = document.getElementById("live-label");
+const actionStatusEl = document.getElementById("action-status");
+const uploadButtonEl = document.getElementById("upload-button");
+const uploadFileEl = document.getElementById("upload-file");
+const logsEl = document.getElementById("logs");
+
+const palette = [
+    [0, 0, 0],
+    [0, 0, 205],
+    [205, 0, 0],
+    [205, 0, 205],
+    [0, 205, 0],
+    [0, 205, 205],
+    [205, 205, 0],
+    [205, 205, 205],
+];
+
+const brightPalette = [
+    [0, 0, 0],
+    [0, 0, 255],
+    [255, 0, 0],
+    [255, 0, 255],
+    [0, 255, 0],
+    [0, 255, 255],
+    [255, 255, 0],
+    [255, 255, 255],
+];
+
+const keyboardRows = [0xfe, 0xfd, 0xfb, 0xf7, 0xef, 0xdf, 0xbf, 0x7f];
+const rowStates = new Map(keyboardRows.map((row) => [row, 0x1f]));
+const activeKeys = new Map();
+let currentMemory = null;
+let currentBorder = 0;
+let flashPhase = false;
+
+function websocketUrl() {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    return `${protocol}//${window.location.host}${window.location.pathname}${window.location.search}`;
+}
+
+function setPixel(data, width, x, y, color) {
+    const offset = (y * width + x) * 4;
+    data[offset] = color[0];
+    data[offset + 1] = color[1];
+    data[offset + 2] = color[2];
+    data[offset + 3] = 255;
+}
+
+function setLive(connected, label) {
+    liveEl.classList.toggle("connected", connected);
+    liveLabelEl.textContent = label;
+}
+
+function setActionStatus(kind, text) {
+    actionStatusEl.style.display = text ? "block" : "none";
+    actionStatusEl.className = kind === "error" ? "status error" : "status";
+    actionStatusEl.textContent = text || "";
+}
+
+function appendLog(message) {
+    const line = document.createElement("div");
+    line.textContent = message;
+    logsEl.appendChild(line);
+    logsEl.scrollTop = logsEl.scrollHeight;
+}
+
+function setLogs(messages) {
+    logsEl.textContent = "";
+    for (const message of messages || []) {
+        appendLog(message);
+    }
+}
+
+function clearScreen(borderIndex) {
+    const borderColor = palette[borderIndex & 0x07];
+    for (let y = 0; y < 256; y++) {
+        for (let x = 0; x < 320; x++) {
+            setPixel(imageData.data, 320, x, y, borderColor);
+        }
+    }
+    ctx.putImageData(imageData, 0, 0);
+}
+
+function sendRow(row) {
+    if (ws.readyState !== WebSocket.OPEN) {
+        return;
+    }
+    ws.send(JSON.stringify({
+        type: "key",
+        row,
+        data: rowStates.get(row) ?? 0x1f,
+    }));
+}
+
+function resetKeyboard() {
+    for (const row of keyboardRows) {
+        rowStates.set(row, 0x1f);
+        sendRow(row);
+    }
+    activeKeys.clear();
+}
+
+function keyDefsForEvent(event) {
+    const key = typeof event.key === "string" ? event.key.toLowerCase() : "";
+    const code = event.code;
+
+    const map = {
+        Digit1: [{row: 0xf7, bit: 0}],
+        Digit2: [{row: 0xf7, bit: 1}],
+        Digit3: [{row: 0xf7, bit: 2}],
+        Digit4: [{row: 0xf7, bit: 3}],
+        Digit5: [{row: 0xf7, bit: 4}],
+        Digit6: [{row: 0xef, bit: 4}],
+        Digit7: [{row: 0xef, bit: 3}],
+        Digit8: [{row: 0xef, bit: 2}],
+        Digit9: [{row: 0xef, bit: 1}],
+        Digit0: [{row: 0xef, bit: 0}],
+        KeyQ: [{row: 0xfb, bit: 0}],
+        KeyW: [{row: 0xfb, bit: 1}],
+        KeyE: [{row: 0xfb, bit: 2}],
+        KeyR: [{row: 0xfb, bit: 3}],
+        KeyT: [{row: 0xfb, bit: 4}],
+        KeyY: [{row: 0xdf, bit: 4}],
+        KeyU: [{row: 0xdf, bit: 3}],
+        KeyI: [{row: 0xdf, bit: 2}],
+        KeyO: [{row: 0xdf, bit: 1}],
+        KeyP: [{row: 0xdf, bit: 0}],
+        KeyA: [{row: 0xfd, bit: 0}],
+        KeyS: [{row: 0xfd, bit: 1}],
+        KeyD: [{row: 0xfd, bit: 2}],
+        KeyF: [{row: 0xfd, bit: 3}],
+        KeyG: [{row: 0xfd, bit: 4}],
+        KeyH: [{row: 0xbf, bit: 4}],
+        KeyJ: [{row: 0xbf, bit: 3}],
+        KeyK: [{row: 0xbf, bit: 2}],
+        KeyL: [{row: 0xbf, bit: 1}],
+        Enter: [{row: 0xbf, bit: 0}],
+        ShiftLeft: [{row: 0xfe, bit: 0}],
+        ShiftRight: [{row: 0x7f, bit: 1}],
+        KeyZ: [{row: 0xfe, bit: 1}],
+        KeyX: [{row: 0xfe, bit: 2}],
+        KeyC: [{row: 0xfe, bit: 3}],
+        KeyV: [{row: 0xfe, bit: 4}],
+        KeyB: [{row: 0x7f, bit: 4}],
+        KeyN: [{row: 0x7f, bit: 3}],
+        KeyM: [{row: 0x7f, bit: 2}],
+        Space: [{row: 0x7f, bit: 0}],
+        ControlLeft: [{row: 0x7f, bit: 1}],
+        ControlRight: [{row: 0x7f, bit: 1}],
+        AltLeft: [{row: 0x7f, bit: 1}],
+        AltRight: [{row: 0x7f, bit: 1}],
+        Backspace: [{row: 0xfe, bit: 0}, {row: 0xef, bit: 0}],
+        ArrowLeft: [{row: 0xfe, bit: 0}, {row: 0xf7, bit: 4}],
+        ArrowDown: [{row: 0xfe, bit: 0}, {row: 0xef, bit: 4}],
+        ArrowUp: [{row: 0xfe, bit: 0}, {row: 0xef, bit: 3}],
+        ArrowRight: [{row: 0xfe, bit: 0}, {row: 0xef, bit: 2}],
+    };
+
+    if (map[code]) {
+        return map[code];
+    }
+
+    if (key === ".") {
+        return [{row: 0x7f, bit: 1}, {row: 0x7f, bit: 2}];
+    }
+    if (key === ",") {
+        return [{row: 0x7f, bit: 1}, {row: 0x7f, bit: 3}];
+    }
+    if (key === "/") {
+        return [{row: 0x7f, bit: 1}, {row: 0x7f, bit: 4}];
+    }
+    if (key === ";") {
+        return [{row: 0x7f, bit: 1}, {row: 0xbf, bit: 1}];
+    }
+    if (key === "'") {
+        return [{row: 0x7f, bit: 1}, {row: 0xbf, bit: 0}];
+    }
+    if (key === "-") {
+        return [{row: 0x7f, bit: 1}, {row: 0xef, bit: 3}];
+    }
+    if (key === "=") {
+        return [{row: 0x7f, bit: 1}, {row: 0xef, bit: 2}];
+    }
+
+    return [];
+}
+
+function applyKeyDefs(defs, pressed) {
+    const changedRows = new Set();
+
+    for (const def of defs) {
+        const current = rowStates.get(def.row) ?? 0x1f;
+        const next = pressed ? (current & ~(1 << def.bit)) : (current | (1 << def.bit));
+        if (next !== current) {
+            rowStates.set(def.row, next);
+            changedRows.add(def.row);
+        }
+    }
+
+    for (const row of changedRows) {
+        sendRow(row);
+    }
+}
+
+function renderSpectrum(memory, borderIndex, flashOn) {
+    const borderColor = palette[borderIndex & 0x07];
+
+    for (let y = 0; y < 256; y++) {
+        for (let x = 0; x < 320; x++) {
+            setPixel(imageData.data, 320, x, y, borderColor);
+        }
+    }
+
+    for (let y = 0; y < 192; y++) {
+        const pixelRowOffset = ((y & 0xc0) << 5) | ((y & 0x07) << 8) | ((y & 0x38) << 2);
+        const attrRowOffset = 6144 + ((y >> 3) * 32);
+
+        for (let xByte = 0; xByte < 32; xByte++) {
+            const pixelByte = memory[pixelRowOffset + xByte];
+            const attribute = memory[attrRowOffset + xByte];
+            const bright = (attribute & 0x40) !== 0;
+            const flash = (attribute & 0x80) !== 0;
+            let inkIndex = attribute & 0x07;
+            let paperIndex = (attribute >> 3) & 0x07;
+            if (flash && flashOn) {
+                const tmp = inkIndex;
+                inkIndex = paperIndex;
+                paperIndex = tmp;
+            }
+            const paletteSet = bright ? brightPalette : palette;
+            const ink = paletteSet[inkIndex];
+            const paper = paletteSet[paperIndex];
+
+            for (let bit = 0; bit < 8; bit++) {
+                const mask = 0x80 >> bit;
+                const color = (pixelByte & mask) !== 0 ? ink : paper;
+                setPixel(imageData.data, 320, 32 + xByte * 8 + bit, 32 + y, color);
+            }
+        }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+}
+
+function rerenderCurrentFrame() {
+    if (!currentMemory) {
+        return;
+    }
+    renderSpectrum(currentMemory, currentBorder, flashPhase);
+}
+
+function decodeBase64(base64) {
+    const raw = atob(base64);
+    const bytes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) {
+        bytes[i] = raw.charCodeAt(i);
+    }
+    return bytes;
+}
+
+async function inflateMemory(base64) {
+    const compressed = decodeBase64(base64);
+    const stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream("deflate"));
+    const decompressed = await new Response(stream).arrayBuffer();
+    return new Uint8Array(decompressed);
+}
+
+async function handleMessage(message) {
+    if (!message || typeof message !== "object") {
+        return;
+    }
+
+    if (message.type === "screen_state") {
+        powerStateEl.textContent = message.powered_on ? "Powered on" : "Powered off";
+        currentMemory = null;
+        currentBorder = message.border || 0;
+        clearScreen(message.border || 0);
+        screenMetaEl.textContent = message.powered_on ? "Waiting for video memory..." : "Computer is powered off";
+        return;
+    }
+
+    if (message.type === "screen_frame") {
+        const memory = await inflateMemory(message.memory_base64 || "");
+        currentMemory = memory;
+        currentBorder = message.border || 0;
+        rerenderCurrentFrame();
+        powerStateEl.textContent = "Powered on";
+        screenMetaEl.textContent = "";
+        return;
+    }
+
+    if (message.type === "status") {
+        setActionStatus(message.kind || "", message.text || "");
+        return;
+    }
+
+    if (message.type === "log") {
+        appendLog(message.message || "");
+        return;
+    }
+
+    if (message.type === "log_history") {
+        setLogs(message.messages || []);
+    }
+}
+
+const ws = new WebSocket(websocketUrl());
+
+ws.addEventListener("open", () => {
+    setLive(true, "Live");
+    canvas.focus();
+});
+
+ws.addEventListener("message", async (event) => {
+    try {
+        await handleMessage(JSON.parse(event.data));
+    } catch (error) {
+        screenMetaEl.textContent = "Invalid frame data";
+    }
+});
+
+ws.addEventListener("close", () => {
+    setLive(false, "Disconnected");
+    resetKeyboard();
+    screenMetaEl.textContent = "Connection closed";
+});
+
+ws.addEventListener("error", () => {
+    setLive(false, "Error");
+    screenMetaEl.textContent = "Connection error";
+});
+
+function uploadFile(file) {
+    if (!file || ws.readyState !== WebSocket.OPEN) {
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+        const result = String(reader.result || "");
+        const contentBase64 = result.includes(",") ? result.split(",", 2)[1] : "";
+        ws.send(JSON.stringify({
+            type: "upload",
+            name: file.name,
+            content_base64: contentBase64,
+        }));
+        uploadFileEl.value = "";
+    };
+    reader.readAsDataURL(file);
+}
+
+uploadButtonEl.addEventListener("click", () => {
+    uploadFileEl.click();
+});
+
+uploadFileEl.addEventListener("change", () => {
+    uploadFile(uploadFileEl.files[0]);
+});
+
+window.addEventListener("keydown", (event) => {
+    if (event.repeat || ws.readyState !== WebSocket.OPEN) {
+        return;
+    }
+
+    const defs = keyDefsForEvent(event);
+    if (!defs.length) {
+        return;
+    }
+
+    event.preventDefault();
+    const keyId = event.code;
+    if (activeKeys.has(keyId)) {
+        return;
+    }
+
+    activeKeys.set(keyId, defs);
+    applyKeyDefs(defs, true);
+});
+
+window.addEventListener("keyup", (event) => {
+    const keyId = event.code;
+    const defs = activeKeys.get(keyId) || keyDefsForEvent(event);
+    if (!defs.length) {
+        return;
+    }
+
+    event.preventDefault();
+    activeKeys.delete(keyId);
+    applyKeyDefs(defs, false);
+});
+
+window.addEventListener("blur", () => {
+    if (ws.readyState === WebSocket.OPEN) {
+        resetKeyboard();
+    } else {
+        activeKeys.clear();
+        for (const row of keyboardRows) {
+            rowStates.set(row, 0x1f);
+        }
+    }
+});
+
+clearScreen(0);
+setLive(false, "Disconnected");
+if (window.location.search.includes("command=")) {
+    window.history.replaceState(null, "", {{ clean_url|tojson }});
+}
+setInterval(() => {
+    flashPhase = !flashPhase;
+    rerenderCurrentFrame();
+}, 320);
+</script>
+</body>
+</html>

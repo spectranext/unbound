@@ -1,0 +1,17 @@
+FROM alpine:3.19.1
+
+RUN apk update && apk add --no-cache cmake git build-base python3 py3-pip py3-setuptools \
+    build-base libxml2 libxml2-dev m4 perl bison flex ragel perl-utils perl-dev dos2unix re2c jpeg-dev zlib-dev && \
+    cpan install Modern::Perl YAML::Tiny CPU::Z80::Assembler && \
+    pip3 install Pillow --break-system-packages 
+
+COPY tnfsd /build/tnfsd
+RUN mkdir /tnfsd
+RUN mkdir /data
+
+RUN cd /build/tnfsd && \
+    make OS=LINUX TARGET_DIR=/tnfsd && \
+    chmod 0444 -R /data && chmod +x /tnfsd/tnfsd
+
+WORKDIR /sandbox/server
+CMD /tnfsd/tnfsd /data

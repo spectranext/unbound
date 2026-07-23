@@ -1,0 +1,7 @@
+data:
+  - type: png2c
+    name: tiles
+    hex: true
+    dump-color: true
+    preferred-bg: black
+    preferred-fg: bright-white

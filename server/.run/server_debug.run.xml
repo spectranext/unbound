@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="server_debug" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="--scenario flat --dont-save-map --py-debug localhost 1379" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="zx_sandbox_server" TARGET_NAME="server_debug" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="zx_sandbox_server" RUN_TARGET_NAME="server_debug">
+    <envs>
+      <env name="DEV_TNFS" value="127.10.0.1" />
+    </envs>
+    <method v="2">
+      <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>

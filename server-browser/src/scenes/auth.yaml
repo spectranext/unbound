@@ -1,0 +1,18 @@
+version: 1
+scenes:
+  scene:
+    - name: connect_btn
+      type: button
+      boundaries: 14, 23, 8, 1
+      key: 13
+      icon: GUI_ICON_RETURN
+      title: "Connect"
+      callback: connect_cb
+    - name: servers_list
+      type: select
+      focus: true
+      boundaries: 1, 14, 30, 8
+      obtain_data: get_servers_list
+      selected: server_selected
+      options_capacity: 16
+      user: "NULL"

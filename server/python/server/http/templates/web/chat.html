@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Server Chat</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #16181c;
+            --panel: #20242a;
+            --panel-alt: #252a31;
+            --border: #313741;
+            --text: #e7eaee;
+            --muted: #98a2b3;
+            --accent: #6f8fb8;
+            --accent-strong: #87a5cb;
+            --input: #1b1f25;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font: 13px Inter, "Segoe UI", Arial, sans-serif;
+        }
+
+        .page {
+            max-width: 960px;
+            min-height: 100vh;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .window {
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 32px);
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .titlebar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 12px;
+            background: var(--panel-alt);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .title {
+            color: var(--accent-strong);
+            font-weight: 600;
+        }
+
+        .meta {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            background: #181b20;
+        }
+
+        .message {
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            background: var(--input);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .message-name {
+            color: var(--accent-strong);
+            font-weight: 600;
+        }
+
+        .message-time {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .message-text {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .composer {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 10px;
+            padding: 12px;
+            background: var(--panel);
+            border-top: 1px solid var(--border);
+        }
+
+        .input {
+            width: 100%;
+            min-width: 0;
+            padding: 10px 12px;
+            color: var(--text);
+            background: var(--input);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .input:focus {
+            border-color: var(--accent);
+        }
+
+        .button {
+            padding: 10px 14px;
+            color: #f5f8fc;
+            background: var(--accent);
+            border: 1px solid transparent;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background: var(--accent-strong);
+        }
+
+        .status {
+            padding: 8px 12px;
+            color: var(--muted);
+            border-top: 1px solid var(--border);
+            background: var(--panel-alt);
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <section class="window">
+        <div class="titlebar">
+            <div class="title">Server Chat</div>
+            <div class="meta">Signed in as {{ display_name }}</div>
+        </div>
+        <div id="messages" class="messages"></div>
+        <form id="composer" class="composer">
+            <input id="text" class="input" type="text" maxlength="400" placeholder="Send message" autocomplete="off">
+            <button class="button" type="submit">Send</button>
+        </form>
+        <div id="status" class="status">Connecting...</div>
+    </section>
+</main>
+<script>
+const messagesEl = document.getElementById("messages");
+const statusEl = document.getElementById("status");
+const composerEl = document.getElementById("composer");
+const textEl = document.getElementById("text");
+
+function websocketUrl() {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    return `${protocol}//${window.location.host}${window.location.pathname}${window.location.search}`;
+}
+
+function formatTime(timestamp) {
+    if (!timestamp) {
+        return "";
+    }
+    return new Date(timestamp * 1000).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+}
+
+function appendMessage(message) {
+    if (!message || message.type !== "chat_message") {
+        return;
+    }
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "message";
+    wrapper.innerHTML = `
+        <div class="message-header">
+            <span class="message-name"></span>
+            <span class="message-time"></span>
+        </div>
+        <div class="message-text"></div>
+    `;
+    wrapper.querySelector(".message-name").textContent = message.name || "unknown";
+    wrapper.querySelector(".message-time").textContent = formatTime(message.sent_at);
+    wrapper.querySelector(".message-text").textContent = message.text || "";
+    messagesEl.appendChild(wrapper);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+const ws = new WebSocket(websocketUrl());
+
+ws.addEventListener("open", () => {
+    statusEl.textContent = "Connected";
+    textEl.focus();
+});
+
+ws.addEventListener("message", (event) => {
+    try {
+        appendMessage(JSON.parse(event.data));
+    } catch (error) {
+        statusEl.textContent = "Invalid server message";
+    }
+});
+
+ws.addEventListener("close", () => {
+    statusEl.textContent = "Disconnected";
+    textEl.disabled = true;
+});
+
+ws.addEventListener("error", () => {
+    statusEl.textContent = "Connection error";
+});
+
+composerEl.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const text = textEl.value.trim();
+    if (!text || ws.readyState !== WebSocket.OPEN) {
+        return;
+    }
+    ws.send(JSON.stringify({
+        type: "chat_send",
+        text,
+    }));
+    textEl.value = "";
+});
+</script>
+</body>
+</html>

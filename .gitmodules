@@ -1,0 +1,16 @@
+[submodule "server/uthash"]
+	path = server/uthash
+	url = https://github.com/troydhanson/uthash.git
+	ignore = dirty
+[submodule "common/proto"]
+	path = common/proto
+	url = git@github.com:speccytools/zx-proto.git
+[submodule "client/gui"]
+	path = client/gui
+	url = git@github.com:speccytools/zxgui.git
+[submodule "server/Z80"]
+	path = server/Z80
+	url = git@github.com:desertkun/Z80.git
+[submodule "server/Zeta"]
+	path = server/Zeta
+	url = https://github.com/redcode/Zeta.git

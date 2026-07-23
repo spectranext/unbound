@@ -1,0 +1,1307 @@
+items:
+  '.':
+    name: "Sky"
+    create_block: !eval NeighboringBlockObject(Neighbors.BRIGHT_SKY_NEIGHBORING_SET, midrange_light=0, is_blocking=False, **kwargs)
+    icon: !!python/name:server.blocks.BG_DAY_EMPTY
+    stack_limit: 32
+    remove_checks:
+      const: "You can't"
+  '^':
+    name: "Dask Sky"
+    create_block: !eval NeighboringBlockObject(Neighbors.DARK_SKY_NEIGHBORING_SET, midrange_light=0, is_blocking=False, **kwargs)
+    icon: !!python/name:server.blocks.BG_NIGHT_EMPTY
+    stack_limit: 32
+    remove_checks:
+      const: "You can't"
+
+  sword_s:
+    name: "Sword/S"
+    description: "Stone sword to hit enemies with"
+    documentation: |
+      If player has this item in the inventory, basic "knuckle" hits is replaced with a sword hit, as it deals
+      more damage.
+    create_block: !eval BlockObject(blocks.SWORD, **kwargs)
+    icon: !!python/name:server.blocks.SWORD
+    stack_limit: 1
+    weapon: true
+    selectable: false
+    hit_distance: 4
+    degradation_per_hit: 0.05
+    unlock:
+      contract: "delivery-2"
+    hit_features:
+      left: SWORDL
+      right: SWORDR
+      hit_value: 20
+      hit_offset: 1
+    crafting:
+      required:
+        wood: 1
+    store:
+      amount: 1
+      value: 5
+    place_checks:
+      deny: true
+
+  ac:
+    name: "Ammo Crate"
+    description: "Ammunition crate for refilling weapons"
+    documentation: |
+      Ammo crates can be used to refill weapon ammunition. Different weapons require different amounts of ammo crates to fully reload.
+    icon: !!python/name:server.blocks.SHOTGUN_SHELL
+    stack_limit: 32
+    selectable: false
+    store:
+      amount: 16
+      value: 1
+    place_checks:
+      deny: true
+
+  heat_pack:
+    name: "Heat Pack"
+    description: "Emergency Heating Device to heat you during cold nights"
+    documentation: |
+      If a player becomes too cold during night, heat pack is a best solution to provide head necessary to survive
+      the night.
+    icon: !!python/name:server.blocks.HEAT_PACK
+    stack_limit: 8
+    selectable: false
+    self_action:
+      name: "heat self"
+      action: heat_self
+      heat_duration: 500
+    store:
+      amount: 4
+      value: 7
+    place_checks:
+      deny: true
+
+  sh1:
+    name: "Shotgun"
+    description: "Firearm for short distance."
+    documentation: |
+      If player has this item in the inventory, player can shoot at short distant targets.
+    icon: !!python/name:server.blocks.SHOTGUN
+    stack_limit: 1
+    weapon: true
+    hit_distance: 10
+    degradation_per_hit: 0.01
+    unlock:
+      contract: "delivery-2"
+    hold_object_state: [2, 3, 4, 5, 6]
+    hit_features:
+      hit_value: 5
+      hit_offset: 1
+      hit_auto: 0
+      hit_delay: 20
+      hit_amount: 3
+      hit_range: 0.7
+      hit_sound: 0
+      hit_effect: ["FIRE1", "FIRE2", "FIRE3"]
+      hit_capacity: 6
+      hit_refill_item: ac
+      hit_refill_amount: 2
+      hit_refill_time: 2000
+    store:
+      amount: 1
+      value: 23
+    place_checks:
+      deny: true
+
+  rf1:
+    name: "Rifle"
+    description: "Firearm for assault engagment."
+    documentation: |
+      If player has this item in the inventory, player can shoot at short distant targets.
+    icon: !!python/name:server.blocks.RIFLE
+    stack_limit: 1
+    weapon: true
+    hit_distance: 10
+    degradation_per_hit: 0.01
+    hold_object_state: [2, 3, 4, 5, 6]
+    hit_features:
+      hit_value: 5
+      hit_offset: 1
+      hit_auto: 1
+      hit_delay: 8
+      hit_range: 0.2
+      hit_sound: 10
+      hit_effect: ["FIRE1", "FIRE2", "FIRE3"]
+      hit_capacity: 30
+      hit_refill_item: ac
+      hit_refill_amount: 3
+      hit_refill_time: 2000
+    unlock:
+      contract: "delivery-3"
+    store:
+      amount: 1
+      value: 23
+    place_checks:
+      deny: true
+
+  hg1:
+    name: "Handgun"
+    description: "Firearm for your side."
+    documentation: |
+      If player has this item in the inventory, player can shoot at short distant targets.
+    icon: !!python/name:server.blocks.HANDGUN
+    stack_limit: 1
+    weapon: true
+    hit_distance: 10
+    degradation_per_hit: 0.01
+    hold_object_state: [7, 8, 9, 10, 11]
+    hit_features:
+      hit_value: 80
+      hit_offset: 1
+      hit_auto: 0
+      hit_delay: 1
+      hit_sound: 10
+      hit_effect: ["FIRE1", "FIRE2", "FIRE3"]
+      hit_capacity: 8
+      hit_refill_item: ac
+      hit_refill_amount: 1
+      hit_refill_time: 1500
+    unlock:
+      contract: "fresh-air"
+    store:
+      amount: 1
+      value: 23
+    place_checks:
+      deny: true
+
+  spectrum:
+    name: "Spectrum"
+    description: "Rare metal required for faster-than-light travel"
+    documentation: |
+      Rare metal required for faster-than-light travel.
+    create_block: !eval NeighboringBlockObject(Neighbors.SPECTRUM_NEIGHBORING_SET, is_blocking=True, **kwargs)
+    icon: !!python/name:server.blocks.SPECTRUM_0
+    worm_trigger: 10
+    stack_limit: 32
+    time_to_remove:
+      const: 1000
+    credits: 25
+    remove_state: picking
+    place_checks:
+      deny: true
+
+  grass:
+    name: "Grass"
+    description: "Basic grass"
+    documentation: |
+      Grows over [Ground](#user-content-ground) randomly.
+      
+      tile_image(liana, 2, 1, 26, 27)
+    create_block: !eval NeighboringBlockObject(Neighbors.GRASS_NEIGHBORING_SET, is_blocking=False, **kwargs)
+    icon: !!python/name:server.blocks.GRASS_ICON
+    stack_limit: 32
+    time_to_remove:
+      const: 100
+    burn_time: 10
+
+  spike:
+    name: "Spike"
+    description: "Sharp natural spike"
+    documentation: |
+      Grows over [Ground](#user-content-ground) randomly.
+      To remove it without inflicting pain on yourself, position yourself on the same level as the spike roots.
+    create_block: !eval SpikeBlockObject(Neighbors.SPIKE_NEIGHBORING_SET, touch_damage=5, overlap_damage=25, **kwargs)
+    icon: !!python/name:server.blocks.SPIKE_0
+    stack_limit: 32
+    time_to_remove:
+      const: 100
+
+  popstone:
+    name: "Popstone"
+    description: "Volatile stone that pops after being disturbed. Once disturbed, it must be collected before it becomes unstable and explodes."
+    create_block: !eval PopstoneBlockObject(blocks.POPSTONE_NORMAL_2, **kwargs)
+    icon: !!python/name:server.blocks.POPSTONE_NORMAL_2
+    stack_limit: 32
+    credits: 50
+    time_to_remove:
+      const: 0
+
+  rock:
+    name: "Rock"
+    description: "Rock mineral"
+    create_block: !eval LinkedBlockObject(**kwargs)
+    icon: !!python/name:server.blocks.ROCK_1
+    stack_limit: 32
+    time_to_remove:
+      const: 2000
+    remove_state: picking
+    place_checks:
+      const: "You can't plant a rock back"
+
+  liana:
+    name: "Liana"
+    description: "String-alike grass"
+    documentation: |
+      Liane usually grows like so:
+      
+      tile_image(liana, 1, 5, 127, 128, 127, 128, 129)
+    create_block: !eval LinkedBlockObject(**kwargs)
+    icon: !!python/name:server.blocks.LIANA_LEFT
+    stack_limit: 32
+    time_to_remove:
+      const: 100
+    burn_time: 10
+
+  ladder:
+    name: "Ladder"
+    description: "Wood ladder"
+    documentation: |
+      A ladder that helps to get into places:
+      
+      tile_image(ladder, 1, 5, 214, 215, 216, 217, 118)
+    create_block: !eval NeighboringBlockObject(Neighbors.LADDERS_NEIGHBORING_SET, is_blocking=False, **kwargs)
+    icon: !!python/name:server.blocks.LADDER_MIDDLE_1
+    stack_limit: 32
+    crafting:
+      required:
+        wood: 4
+      amount: 16
+    time_to_remove:
+      const: 100
+    burn_time: 10
+
+  wall:
+    name: "Wall"
+    description: "Wall to secure your base"
+    create_block: !eval BlockObject(blocks.WALL, **kwargs)
+    icon: !!python/name:server.blocks.WALL
+    stack_limit: 32
+    store:
+      amount: 20
+      value: 29
+      buyback: false
+    crafting:
+      required:
+        ground: 10
+      amount: 1
+    time_to_remove:
+      const: 100
+    unlock:
+      contract: "fresh-air"
+
+  cobweb:
+    name: "Cobweb"
+    description: "Cobweb"
+    documentation: |
+      Cobweb usually grows like so:
+      
+      tile_image(cobweb, 2, 2, 130, 131, 132, 0)
+    create_block: !eval LinkedBlockObject(**kwargs)
+    icon: !!python/name:server.blocks.COBWEB_ICON
+    stack_limit: 64
+    time_to_remove:
+      const: 200
+    burn_time: 5
+
+  sapling:
+    name: "Sapling"
+    description: "Grass saplings"
+    create_block: !eval BlockObject(code=random.choice(blocks.GRASS_SAPLINGS), **kwargs)
+    icon: !!python/name:server.blocks.GRASS_SAPLINGS_ICON
+    stack_limit: 32
+    time_to_remove:
+      const: 200
+    burn_time: 20
+
+  flower:
+    name: "Flower"
+    description: "A flower"
+    documentation: |
+      A flower you can heal yourself with.
+      tile_image(Few examples of flowers, 5, 2, 29, 0, 30, 0, 31, 28, 0, 28, 0, 28)
+    create_block: !eval LinkedBlockObject(code=random.choice(blocks.FLOWERS), **kwargs)
+    icon: !!python/name:server.blocks.FLOWERS_ICON
+    stack_limit: 32
+    place_checks:
+      const: "You can't plant a flower back"
+    time_to_remove:
+      const: 50
+    burn_time: 5
+    self_action:
+      name: "heal self"
+      action: heal_self
+      heal_amount: 10
+
+  water:
+    name: "Water"
+    description: "Water fluid"
+    create_block: !eval LiquidBlockObject(Neighbors.WATER_NEIGHBORING_SET, **kwargs)
+    icon: !!python/name:server.blocks.WATER
+    stack_limit: 8
+    remove_checks:
+      attr_required:
+        attr: "bucket"
+        value: 1
+        error: "You need a bucket for that"
+    time_to_remove:
+      const: 1000
+
+  ground:
+    name: "Ground"
+    description: "Soft ground"
+    create_block: !eval GroundBlockObject(Neighbors.GROUND_NEIGHBORING_SET, grass=[get_item("grass")] * 8 + [get_item("spike")] * 2 + [get_item("sapling")], **kwargs)
+    icon: !!python/name:server.blocks.GROUND_0
+    stack_limit: 32
+    worm_trigger: 2
+    time_to_remove:
+      const: 200
+    remove_state: picking
+
+  wood:
+    name: "Wood"
+    description: "Piece of raw wood"
+    create_block: !eval BlockObject(blocks.WOOD, **kwargs)
+    icon: !!python/name:server.blocks.WOOD
+    burn_time: 50
+    stack_limit: 32
+    time_to_remove:
+      const: 200
+    remove_state: picking
+
+  awd:
+    name: "Wood"
+    description: "Growing wood"
+    create_block: !eval LinkedBlockObject(**kwargs)
+    icon: !!python/name:server.blocks.WOOD
+    remove_swap_to: "wood"
+    stack_limit: 32
+    time_to_remove:
+      const: 200
+    remove_state: picking
+
+  meat:
+    name: "MonsterMeat"
+    description: "Raw monster meat"
+    icon: !!python/name:server.blocks.MEAT
+    stack_limit: 64
+    store:
+      value: 0
+
+  tube:
+    name: "Tube"
+    description: "Transport Tube"
+    documentation: |
+      Tube block that can be arranged into transportation routs that connects outputs and inputs of various bases
+      together. When an outlet of a base wishes to push its output, and a tube is connected, the item will
+      start moving towards tube.
+      
+      tile_image(tubes with a item passing by, 4, 2, 0, 93, 108, 94, 93, 95, 0, 97)
+      
+      When an item in the tube reaches a corresponding inlet, it gets transferred to bases' inlet inventory, where
+      it can be processed and/or taken out by a player.
+    create_block: !eval TubeBlockObject(Neighbors.TUBE_NEIGHBORING_SET, Neighbors.FILLED_TUBE_NEIGHBORING_SET, tag="transport", **kwargs)
+    icon: !!python/name:server.blocks.TUBE_0
+    stack_limit: 32
+
+  coal:
+    name: "Coal"
+    create_block: !eval BlockObject(blocks.COAL, **kwargs)
+    stack_limit: 40
+    icon: !!python/name:server.blocks.COAL
+    store:
+      amount: 20
+      value: 19
+    place_checks:
+      deny: true
+    time_to_remove:
+      const: 500
+    unlock:
+      contract: "delivery-3"
+    remove_state: picking
+
+  ore_iron:
+    name: "Iron Ore"
+    create_block: !eval BlockObject(code=blocks.IRON_ORE, **kwargs)
+    stack_limit: 32
+    place_checks:
+      deny: true
+    icon: !!python/name:server.blocks.IRON_ORE
+    worm_trigger: 5
+    time_to_remove:
+      const: 2000
+    remove_state: picking
+    store:
+      value: 1
+
+  ore_copper:
+    name: "Copper Ore"
+    create_block: !eval BlockObject(blocks.COPPER_ORE, **kwargs)
+    stack_limit: 32
+    place_checks:
+      deny: true
+    icon: !!python/name:server.blocks.COPPER_ORE
+    worm_trigger: 5
+    time_to_remove:
+      const: 2000
+    remove_state: picking
+    store:
+      value: 4
+
+  ore_gold:
+    name: "Gold Ore"
+    create_block: !eval BlockObject(blocks.GOLD_ORE, **kwargs)
+    stack_limit: 32
+    place_checks:
+      deny: true
+    icon: !!python/name:server.blocks.GOLD_ORE
+    worm_trigger: 5
+    time_to_remove:
+      const: 2000
+    remove_state: picking
+    store:
+      value: 9
+
+  ingot_iron:
+    name: "Iron Ingot"
+    create_block: !eval BlockObject(blocks.IRON_INGOT, **kwargs)
+    stack_limit: 32
+    icon: !!python/name:server.blocks.IRON_INGOT
+    crafting:
+      required:
+        ore_iron: 4
+    place_checks:
+      deny: true
+    unlock:
+      contract: "delivery-1"
+    store:
+      value: 14
+
+  ingot_copper:
+    name: "Copper Ingot"
+    create_block: !eval BlockObject(blocks.COPPER_INGOT, **kwargs)
+    stack_limit: 32
+    icon: !!python/name:server.blocks.COPPER_INGOT
+    crafting:
+      required:
+        ore_copper: 4
+    place_checks:
+      deny: true
+    unlock:
+      contract: "delivery-1"
+    store:
+      value: 24
+
+  ingot_gold:
+    name: "Gold Ingot"
+    create_block: !eval BlockObject(blocks.GOLD_INGOT, **kwargs)
+    stack_limit: 32
+    icon: !!python/name:server.blocks.GOLD_INGOT
+    crafting:
+      required:
+        ore_gold: 4
+    place_checks:
+      deny: true
+    unlock:
+      contract: "delivery-1"
+    store:
+      value: 49
+
+  sheet_iron:
+    name: "Iron Sheet"
+    create_block: !eval BlockObject(code=blocks.IRON_SHEET, **kwargs)
+    stack_limit: 8
+    icon: !!python/name:server.blocks.IRON_SHEET
+    crafting:
+      required:
+        ingot_iron: 4
+      amount: 8
+    place_checks:
+      deny: true
+    unlock:
+      contract: "delivery-2"
+    store:
+      value: 14
+
+  sheet_copper:
+    name: "Copper Sheet"
+    create_block: !eval BlockObject(code=blocks.COPPER_SHEET, **kwargs)
+    stack_limit: 8
+    icon: !!python/name:server.blocks.COPPER_SHEET
+    crafting:
+      required:
+        ingot_copper: 4
+      amount: 8
+    place_checks:
+      deny: true
+    unlock:
+      contract: "delivery-2"
+    store:
+      value: 24
+
+  sheet_gold:
+    name: "Gold Sheet"
+    create_block: !eval BlockObject(code=blocks.GOLD_SHEET, **kwargs)
+    stack_limit: 8
+    icon: !!python/name:server.blocks.GOLD_SHEET
+    crafting:
+      required:
+        ingot_gold: 4
+      amount: 8
+    place_checks:
+      deny: true
+    unlock:
+      contract: "delivery-2"
+    store:
+      value: 49
+
+  bolt_iron:
+    name: "Iron Bolt"
+    create_block: !eval BlockObject(code=blocks.IRON_BOLT, **kwargs)
+    stack_limit: 64
+    icon: !!python/name:server.blocks.IRON_BOLT
+    crafting:
+      required:
+        ingot_iron: 1
+      amount: 16
+    place_checks:
+      deny: true
+    unlock:
+      contract: "delivery-3"
+    store:
+      value: 7
+
+  bolt_copper:
+    name: "Copper Bolt"
+    create_block: !eval BlockObject(code=blocks.COPPER_BOLT, **kwargs)
+    stack_limit: 64
+    icon: !!python/name:server.blocks.COPPER_BOLT
+    crafting:
+      required:
+        ingot_copper: 1
+      amount: 16
+    place_checks:
+      deny: true
+    unlock:
+      contract: "delivery-3"
+    store:
+      value: 9
+
+  bolt_gold:
+    name: "Gold Bolt"
+    create_block: !eval BlockObject(code=blocks.GOLD_BOLT, **kwargs)
+    stack_limit: 64
+    icon: !!python/name:server.blocks.GOLD_BOLT
+    crafting:
+      required:
+        ingot_gold: 1
+      amount: 16
+    place_checks:
+      deny: true
+    unlock:
+      contract: "delivery-3"
+    store:
+      value: 24
+
+  power:
+    class: PowerBaseItem
+    name: "Power Station"
+    description: "Power Generation utility"
+    actions:
+      - title: "Get Power Status"
+        device: power1
+        requests:
+         - status
+        responses:
+          - var: power
+            type: str
+            description: Status of the power
+            example: "Working"
+        description: |
+          Checks the status of power station. Possible responses are: "Working", "No Fuel", "No Consumers", "Overload"
+    icon: !!python/name:server.blocks.POWER_SPAWNER
+    producer_power: 100
+    progress_block: "1x0"
+    width: 3
+    height: 2
+    place_checks:
+      deny: true
+    blocks:
+      "0x0": blocks.POWER[0]
+      "1x0": blocks.POWER[1]
+      "2x0": blocks.POWER[2]
+      "0x1": blocks.POWER[3]
+      "1x1": tube_inlet_spawner(blocks.POWER[4], "transport", "up")
+      "2x1": blocks.POWER[5]
+
+  power_s:
+    class: BaseSpawnerItem
+    base: power
+    name: "Power Station"
+    description: "When placed, and fuel is provided, can generate electricity for other facilities"
+    icon: !!python/name:server.blocks.POWER_SPAWNER
+    crafting:
+      required:
+        sheet_iron: 4
+        ingot_copper: 4
+        bolt_iron: 8
+        coal: 4
+    unlock:
+      contract: "delivery-3"
+
+  pole:
+    class: PowerPoleItem
+    name: "Power Pole"
+    description: "Energy repeater to provide power further away"
+    icon: !!python/name:server.blocks.POLE_TOP
+    width: 1
+    height: 2
+    health: 10
+    place_checks:
+      deny: true
+    blocks:
+      "0x0": blocks.POLE_BOTTOM
+      "0x1": blocks.POLE_TOP
+
+  pole_s:
+    class: BaseSpawnerItem
+    base: pole
+    name: "Power Pole"
+    description: "Energy repeater to provide power further away"
+    icon: !!python/name:server.blocks.POLE_TOP
+    store:
+      amount: 1
+      value: 19
+    unlock:
+      contract: "delivery-3"
+
+  oxygen_tank:
+    class: OxygenTankBaseItem
+    yield: 10
+    pressure_multiplier: 256
+    name: "Oxygen Tank"
+    description: "Tank with oxygen to refill your needs"
+    icon: !!python/name:server.blocks.OXYGEN_STATION_GENERATING_0
+    width: 1
+    height: 2
+    health: 10
+    place_checks:
+      deny: true
+    blocks:
+      "0x0": blocks.OXYGEN_STATION_1
+      "0x1": blocks.OXYGEN_STATION_0
+
+  oxygen_tank_s:
+    class: BaseSpawnerItem
+    base: oxygen_tank
+    name: "Oxygen Tank"
+    description: "Tank with oxygen to refill your needs"
+    icon: !!python/name:server.blocks.OXYGEN_STATION_GENERATING_0
+    store:
+      amount: 1
+      value: 19
+      buyback: false
+
+  factory:
+    class: FactoryBaseItem
+    name: "Production Factory"
+    description: "Constructs Material"
+    documentation: |
+      When powered on, and Crafting Config is set, can automatically produce items according to config.
+      
+      #### Crafting Config
+      Defines a recipy which the factory will work on. On the ingredients of recipy must but inside the 
+      `Source Items` inventory. Additionally, ingredients can be supplied by means of a [Tube](#user-content-tube).
+      After the crafting is done, the produced item(s) are placed into the `Produced Items` inventory, and
+      if the tube is attached to the outlet, the produced item is send out thought a [tube](#user-content-tube).
+
+    icon: !!python/name:server.blocks.FACTORY_SPAWNER
+    crafting_time: 5
+    power_consumption: 20
+    width: 3
+    height: 2
+    progress_block: "1x0"
+    outlet_block: "0x1"
+    place_checks:
+      deny: true
+    blocks:
+      "0x0": blocks.FACTORY[0]
+      "1x0": blocks.FACTORY[1]
+      "2x0": blocks.FACTORY[2]
+      "0x1": tube_outlet_spawner(blocks.FACTORY[3], "transport", "up")
+      "1x1": blocks.FACTORY[4]
+      "2x1": tube_inlet_spawner(blocks.FACTORY[5], "transport", "up")
+
+  factory_s:
+    class: BaseSpawnerItem
+    base: factory
+    name: "Production Factory"
+    description: "When placed, Constructs Material"
+    icon: !!python/name:server.blocks.FACTORY_SPAWNER
+    crafting:
+      required:
+        sheet_iron: 4
+        bolt_iron: 32
+    store:
+      amount: 1
+      value: 100
+
+  router:
+    class: RouterBaseItem
+    name: "Tube Router"
+    description: "When more than 2 tubes are connected to it, routes traffic between them according to rule"
+    documentation: |
+      Can be configured to either work in SPLITTER MODE, or in ROUTER MODE. Additionally, it can be configured
+      to route/split traffic in a specific direction (up, down, left, right)
+      
+      #### ROUTER mode
+      In router mode, all incoming items are redirected as the arrow points.
+      
+      tile_image(traffic comes from left or right then redirected to top, 5, 4, 0, 0, 97, 0, 0, 0, 0, 97, 0, 0, 93, 96, 100, 96, 94, 97, 0, 0, 0, 97)
+      
+      #### SPLITTER mode
+      In splitter mode, all item coming from the direction as the arrow points, are evenly distributed into other
+      tubes, in a round-robin pattern.
+      
+      tile_image(traffic comes from the left and redirected top or left, 5, 4, 0, 0, 97, 0, 0, 0, 0, 97, 0, 0, 93, 96, 113, 96, 106, 97, 0, 0, 0, 97)
+      
+      #### Computer control
+      When in ROUTER mode, it can be controlled by a computer [computer](#user-content-computer) nearby.
+      To do that, the player choses Advanced -> Control By Computer
+      
+      When computer is selected, and an item passes the router, instead of passing the item along,
+      the router sends the following message to the computer:
+      
+      ```bash
+      route
+      <type>
+      <amount>
+      <router hostname>
+      ```
+      
+      Computer in turn can reply that message, and command to the router to direct loaded item in a certain direction.
+
+      Example of BASIC program that prints info on items that pass by,
+      and controls the router to route all of them "down".
+      
+      ```basic
+      10 PRINT "listening"
+      20 %listen #4,1
+      30 %accept #5,4
+      40 INPUT #5;a$
+      50 PRINT "action=";a$
+      60 INPUT #5;t$
+      70 PRINT " item=";t$
+      80 INPUT #5;am
+      90 PRINT " amount=";am
+      100 INPUT #5;h$
+      110 PRINT " from=";h$
+      120 PRINT #5;"down"
+      130 %close #5
+      140 GO TO 30
+      ```
+
+    actions:
+      - title: "Get Loaded Items"
+        device: router1
+        requests:
+          - item
+        responses:
+          - var: item
+            type: str
+            description: "Type of items"
+            example: "ore_iron"
+          - var: amount
+            type: int
+            description: "Amount of items"
+            example: "1"
+        description: |
+          Gets information about the amount and type of the loaded item. If nothing is loaded, returns "0" and ""
+      - title: "Push Loaded Item"
+        device: router1
+        requests:
+          - push
+          - up
+        description: |
+          Changes the direction of the router into one of following directions: "right", "left", "up", "down", 
+          all items now go in that direction.
+    icon: !!python/name:server.blocks.ROUTER_UP
+    crafting_time: 5
+    place_checks:
+      deny: true
+    power_consumption: 20
+    width: 1
+    height: 1
+    blocks:
+      "0x0": router_spawner(blocks.ROUTER_UP, "transport")
+
+  router_s:
+    class: BaseSpawnerItem
+    base: router
+    name: "Tube Router"
+    description: "When more than 2 tubes are connected to it, routes traffic between them according to rule"
+    icon: !!python/name:server.blocks.ROUTER_UP
+    store:
+      amount: 1
+      value: 19
+    unlock:
+      contract: "delivery-3"
+
+  door:
+    class: DoorBaseItem
+    tag: door
+    name: "Steel Door"
+    place_checks:
+      deny: true
+    description: |
+      Steel door that can be opened and closed. Opens when power is lost.
+    documentation: |
+      Steel door that can be opened and closed. Opens when power is lost.
+      
+      #### Opened door
+      tile_image(Opened door, 1, 4, 196, 0, 0, 194)
+      
+      #### Closed door
+      tile_image(Closed door, 1, 4, 196, 195, 195, 194)
+
+    actions:
+      - title: "Open Door"
+        device: door1
+        requests:
+          - open
+        description: |
+          Opens the door
+      - title: "Close Door"
+        device: door1
+        requests:
+          - close
+        description: |
+          Closes the door
+    power_consumption: 1
+    icon: !!python/name:server.blocks.DOOR
+    crafting_time: 5
+    width: 1
+    height: 4
+    blocks:
+      "0x0": blocks.DOOR_TOP
+      "0x1": blocks.DOOR_FIELD
+      "0x2": blocks.DOOR_FIELD
+      "0x3": blocks.DOOR_BOTTOM
+
+  door_s:
+    class: BaseSpawnerItem
+    base: door
+    name: "Steel Door"
+    description: "Steel door that opened and closed (including programmatically)"
+    icon: !!python/name:server.blocks.DOOR
+    store:
+      amount: 1
+      value: 19
+    unlock:
+      contract: "fresh-air"
+
+  rocket:
+    class: ProjectileItem
+    projectile: rock
+    name: "Rocket"
+    stack_limit: 8
+    damage_value: 60
+    place_checks:
+      deny: true
+    power: 5
+    description: "A projectile that can deal damage"
+    icon: !!python/name:server.blocks.ROCKET
+    store:
+      amount: 10
+      value: 9
+    unlock:
+      contract: "delivery-4"
+
+  collector:
+    class: CollectorBoxItem
+    name: "Container Collector"
+    description: "Can collect items from a tube"
+    documentation: |
+      Has its own inventory (accessed by pressing I nearby), if an inlet tube is connected to it, all items are collected.
+      If an outlet tube is connected, can be commanded by a [Computer](#user-content-computer) to pull an item into the tube.
+
+    icon: !!python/name:server.blocks.COLLECTOR_BOX_ICON
+    width: 3
+    height: 1
+    place_checks:
+      deny: true
+    actions:
+      - title: "Count Items"
+        device: collector1
+        requests:
+          - amount
+          - wood
+        responses:
+          - var: amount
+            type: int
+            description: "Amount of <wood>"
+            example: "1"
+        description: |
+          Count amount of items available of certain item ("wood") and returns its number.
+          If empty string ("") is specified, overall item count is returned.
+      - title: "Pull Items Into Tube"
+        device: collector1
+        requests:
+          - pull
+          - wood
+        description: |
+          Pulls item of type ("wood") and pulls it into an outlet tube. If empty string ("") is specified,
+          any available item is pulled.
+    blocks:
+      "0x0": tube_outlet_spawner(blocks.COLLECTOR_BOX[0], "transport", "up")
+      "1x0": blocks.COLLECTOR_BOX[1]
+      "2x0": tube_inlet_spawner(blocks.COLLECTOR_BOX[2], "transport", "up")
+
+  collector_s:
+    class: BaseSpawnerItem
+    base: collector
+    name: "Container Collector"
+    description: "Can collect items from a tube"
+    icon: !!python/name:server.blocks.COLLECTOR_BOX_ICON
+    store:
+      amount: 1
+      value: 19
+    unlock:
+      contract: "delivery-3"
+
+  fob:
+    class: FOBBaseItem
+    name: "FOB"
+    place_checks:
+      deny: true
+    description: |
+      Forward Operation Base. When placed, allows you to receive and send shipments, craft things.
+      
+      #### Ship Deck
+      
+      FOB can host ships. When a ship has landed onto a FOB, players can interact with ship's deck to take or put items.
+      If player puts any items into ships deck, after the ship goes back, items get sold (and player is compensated).
+      Note that after ship has landed, it goes back automatically in some time, so make sure to take the items you need off ship's deck.
+      To order ships, use StarStore menu.
+      
+      #### StarStore
+      
+      FOB allows the player to purchase items from StarStore.
+      
+      #### Crafting
+      
+      FOB allows players to craft items manually when needed. To craft items automatically, use [Factory](#user-content-factory)
+    icon: !!python/name:server.blocks.FOB_SPAWNER
+    width: 3
+    height: 2
+    blocks:
+      "0x0": blocks.FOB[0]
+      "1x0": blocks.FOB[1]
+      "2x0": blocks.FOB[2]
+      "0x1": blocks.FOB[3]
+      "1x1": blocks.FOB[4]
+      "2x1": blocks.FOB[5]
+
+  fob_s:
+    class: BaseSpawnerItem
+    base: fob
+    name: "FOB"
+    description: "Forward Operation Base\nWhen placed, allows you to receive and send shipments"
+    icon: !!python/name:server.blocks.FOB_SPAWNER
+
+  chest:
+    class: InventoryBoxItem
+    name: "Chest"
+    description: "Chest with goods"
+    place_checks:
+      deny: true
+    documentation: |
+      Basic structure you can place items in (it has its own inventory).
+    icon: !!python/name:server.blocks.CRATE
+
+  computer:
+    class: ComputerBaseItem
+    name: "Computer"
+    description: "ZX Spectrum Computer"
+    place_checks:
+      deny: true
+    documentation: |
+      When powered on, emulates full zx spectrum computer.
+      When the player opens computer menu, the internal computer screen goes full screen as if the player now
+      controls that computer. It can run any code, written in BASIC, C, Asm or anything else, as it emulates
+      z80 processor with 16k of ROM, 48k of RAM and a [Spectranet](https://spectrum.alioth.net/doc/index.php/Main_Page)
+      cartridge.
+      
+      Can run any code, but is the mose useful at [Network Communication](#user-content-network-communication).
+    icon: !!python/name:server.blocks.COMPUTER_ICON
+    width: 2
+    height: 2
+    power_consumption: 20
+    blocks:
+      "0x0": blocks.COMPUTER[0]
+      "1x0": blocks.COMPUTER[1]
+      "0x1": blocks.COMPUTER[2]
+      "1x1": blocks.COMPUTER[3]
+
+  computer_s:
+    class: BaseSpawnerItem
+    base: computer
+    name: "Computer"
+    description: "Executes BASIC Programs"
+    icon: !!python/name:server.blocks.COMPUTER_ICON
+    store:
+      amount: 1
+      value: 49
+    unlock:
+      contract: "delivery-3"
+
+  spidernest:
+    class: SpiderNestBaseItem
+    name: "Spider Nest"
+    description: "A dormant spider nest"
+    place_checks:
+      deny: true
+    icon: !!python/name:server.blocks.SPIDER_NEST_0
+    width: 2
+    height: 2
+    blocks:
+      "0x0": blocks.SPIDER_NEST_2
+      "1x0": blocks.SPIDER_NEST_3
+      "0x1": blocks.SPIDER_NEST_0
+      "1x1": blocks.SPIDER_NEST_1
+
+  spidernest_s:
+    class: BaseSpawnerItem
+    base: spidernest
+    name: "Spider Egg"
+    description: "Places a dormant spider nest"
+    create_block: !eval BlockObject(blocks.SPIDER_NEST_EGG, **kwargs)
+    icon: !!python/name:server.blocks.SPIDER_NEST_EGG
+    stack_limit: 32
+
+  light:
+    class: LightBaseItem
+    name: "Battery-powered light"
+    description: "Produces light, when charged"
+    place_checks:
+      deny: true
+    icon: !!python/name:server.blocks.LIGHT_BOTTOM
+    width: 1
+    height: 2
+    blocks:
+      "0x0": blocks.LIGHT_BOTTOM
+      "0x1": blocks.LIGHT_TOP
+
+  light_s:
+    class: BaseSpawnerItem
+    base: light
+    store:
+      amount: 5
+      value: 2
+    name: "Battery-powered light"
+    description: "Produces light, when charged"
+    create_block: !eval BlockObject(blocks.LIGHT_BOTTOM, **kwargs)
+    icon: !!python/name:server.blocks.LIGHT_BOTTOM
+    stack_limit: 32
+
+  oxygen:
+    name: "Oxygen bottle"
+    description: "A bottle of oxygen"
+    place_checks:
+      deny: true
+    create_block: !eval BlockObject(blocks.OXYGEN)
+    stack_limit: 8
+    icon: !!python/name:server.blocks.OXYGEN
+    store:
+      amount: 4
+      value: 19
+    power_source: 500
+    burn_time: 100
+
+superstructures:
+  cobweb_left:
+    blocks:
+      c: !eval LinkedBlockObject(blocks.COBWEB_RIGHT_CENTER, **kwargs)
+      l: !eval LinkedBlockObject(blocks.COBWEB_RIGHT_LEFT, **kwargs)
+      b: !eval LinkedBlockObject(blocks.COBWEB_RIGHT_BOTTOM, **kwargs)
+      .: !eval None
+    data: |
+      lc
+      .b
+  cobweb_right:
+    blocks:
+      c: !eval LinkedBlockObject(blocks.COBWEB_LEFT_CENTER, **kwargs)
+      r: !eval LinkedBlockObject(blocks.COBWEB_LEFT_RIGHT, **kwargs)
+      b: !eval LinkedBlockObject(blocks.COBWEB_LEFT_BOTTOM, **kwargs)
+      .: !eval None
+    data: |
+      cr
+      b.
+  flower:
+    blocks:
+      u: !eval LinkedBlockObject(random.choice(blocks.FLOWERS), **kwargs)
+      d: !eval LinkedBlockObject(blocks.FLOWER_BASE, **kwargs)
+    data: |
+      u
+      d
+  tree_small:
+    blocks:
+      a: !eval LinkedBlockObject(blocks.TREE_SMALL_TOP_1, **kwargs)
+      b: !eval LinkedBlockObject(blocks.TREE_SMALL_TOP_2, **kwargs)
+      c: !eval LinkedBlockObject(blocks.TREE_SMALL_TOP_3, **kwargs)
+      d: !eval LinkedBlockObject(blocks.TREE_SMALL_BOTTOM_1, **kwargs)
+      e: !eval LinkedBlockObject(blocks.TREE_SMALL_BOTTOM_2, **kwargs)
+      f: !eval LinkedBlockObject(blocks.TREE_SMALL_BOTTOM_3, **kwargs)
+    data: |
+      abc
+      def
+  tree1:
+    blocks:
+      v: !eval LinkedBlockObject(blocks.TREE_BIG_VERY_TOP, **kwargs)
+      l: !eval LinkedBlockObject(blocks.TREE_BIG_LEFT_CORNER, **kwargs)
+      m: !eval LinkedBlockObject(blocks.TREE_BIG_MIDDLE, **kwargs)
+      r: !eval LinkedBlockObject(blocks.TREE_BIG_RIGHT_CORNER, **kwargs)
+      _: !eval LinkedBlockObject(blocks.TREE_LOW_HANGING, **kwargs)
+      q: !eval LinkedBlockObject(blocks.TREE_TRUNK_1, **kwargs)
+      L: !eval LinkedBlockObject(blocks.TREE_TRUNK_LEFT, **kwargs)
+      w: !eval LinkedBlockObject(blocks.TREE_TRUNK_2, **kwargs)
+      e: !eval LinkedBlockObject(blocks.TREE_TRUNK_3, **kwargs)
+      R: !eval LinkedBlockObject(blocks.TREE_TRUNK_RIGHT, **kwargs)
+      x: !eval LinkedBlockObject(blocks.TREE_ROOT_1, **kwargs)
+      y: !eval LinkedBlockObject(blocks.TREE_ROOT_2, **kwargs)
+      z: !eval LinkedBlockObject(blocks.TREE_ROOT_3, **kwargs)
+      .: !eval None
+    data: |
+      .vvv.
+      lmmmr
+      mmmmm
+      mmqmm
+      _Lw__
+      ..eR.
+      .xyz.
+  tree2:
+    blocks:
+      v: !eval LinkedBlockObject(blocks.TREE_BIG_VERY_TOP, **kwargs)
+      l: !eval LinkedBlockObject(blocks.TREE_BIG_LEFT_CORNER, **kwargs)
+      m: !eval LinkedBlockObject(blocks.TREE_BIG_MIDDLE, **kwargs)
+      r: !eval LinkedBlockObject(blocks.TREE_BIG_RIGHT_CORNER, **kwargs)
+      _: !eval LinkedBlockObject(blocks.TREE_LOW_HANGING, **kwargs)
+      q: !eval LinkedBlockObject(blocks.TREE_TRUNK_1, **kwargs)
+      L: !eval LinkedBlockObject(blocks.TREE_TRUNK_LEFT, **kwargs)
+      w: !eval LinkedBlockObject(blocks.TREE_TRUNK_2, **kwargs)
+      e: !eval LinkedBlockObject(blocks.TREE_TRUNK_3, **kwargs)
+      R: !eval LinkedBlockObject(blocks.TREE_TRUNK_RIGHT, **kwargs)
+      x: !eval LinkedBlockObject(blocks.TREE_ROOT_1, **kwargs)
+      y: !eval LinkedBlockObject(blocks.TREE_ROOT_2, **kwargs)
+      z: !eval LinkedBlockObject(blocks.TREE_ROOT_3, **kwargs)
+      .: !eval None
+    data: |
+      .vvv.
+      lmmmr
+      mmmmm
+      mmqmm
+      _Lw__
+      .leR.
+      .Ler.
+      ..eR.
+      .xyz.
+  tree3:
+    blocks:
+      v: !eval LinkedBlockObject(blocks.TREE_BIG_VERY_TOP, **kwargs)
+      l: !eval LinkedBlockObject(blocks.TREE_BIG_LEFT_CORNER, **kwargs)
+      m: !eval LinkedBlockObject(blocks.TREE_BIG_MIDDLE, **kwargs)
+      r: !eval LinkedBlockObject(blocks.TREE_BIG_RIGHT_CORNER, **kwargs)
+      _: !eval LinkedBlockObject(blocks.TREE_LOW_HANGING, **kwargs)
+      q: !eval LinkedBlockObject(blocks.TREE_TRUNK_1, **kwargs)
+      L: !eval LinkedBlockObject(blocks.TREE_TRUNK_LEFT, **kwargs)
+      w: !eval LinkedBlockObject(blocks.TREE_TRUNK_2, **kwargs)
+      e: !eval LinkedBlockObject(blocks.TREE_TRUNK_3, **kwargs)
+      R: !eval LinkedBlockObject(blocks.TREE_TRUNK_RIGHT, **kwargs)
+      x: !eval LinkedBlockObject(blocks.TREE_ROOT_1, **kwargs)
+      y: !eval LinkedBlockObject(blocks.TREE_ROOT_2, **kwargs)
+      z: !eval LinkedBlockObject(blocks.TREE_ROOT_3, **kwargs)
+      .: !eval None
+    data: |
+      .v.
+      lmr
+      mqm
+      _w_
+      _q_
+  rock1:
+    blocks:
+      a: !eval LinkedBlockObject(blocks.ROCK_0, **kwargs)
+    data: |
+      a
+  popstone:
+    blocks:
+      a: !eval PopstoneBlockObject(blocks.POPSTONE_NORMAL_0, **kwargs)
+      b: !eval PopstoneBlockObject(blocks.POPSTONE_NORMAL_1, **kwargs)
+      c: !eval PopstoneBlockObject(blocks.POPSTONE_NORMAL_2, **kwargs)
+      d: !eval PopstoneBlockObject(blocks.POPSTONE_NORMAL_3, **kwargs)
+    data: |
+      ab
+      cd
+  rock2:
+    blocks:
+      a: !eval LinkedBlockObject(blocks.ROCK_1, **kwargs)
+    data: |
+      a
+  rock3:
+    blocks:
+      a: !eval LinkedBlockObject(blocks.ROCK_2_TL, **kwargs)
+      b: !eval LinkedBlockObject(blocks.ROCK_2_TR, **kwargs)
+      c: !eval LinkedBlockObject(blocks.ROCK_2_BL, **kwargs)
+      d: !eval LinkedBlockObject(blocks.ROCK_2_BR, **kwargs)
+    data: |
+      ab
+      cd
+generation:
+  base: ground
+  middle_line: 38
+  layers:
+    - weights:
+        "":
+          probability: 0.5
+      high_limit: 52
+      low_limit: 74
+      skip: 0.7
+      smoothness: 3
+    - weights:
+        "":
+          probability: 0.4
+      high_limit: 42
+      low_limit: 52
+      skip: 0.7
+      smoothness: 1
+    - weights:
+        "":
+          probability: 0.4
+      high_limit: 80
+      low_limit: 90
+      skip: 0.4
+      smoothness: 4
+    - weights:
+        spectrum:
+          probability: 0.6
+      skip: 0.6
+      high_limit: 65
+      low_limit: 67
+      smoothness: 2
+    - weights:
+        coal:
+          probability: 0.1
+      skip: 0.6
+      high_limit: 68
+      smoothness: 1
+    - weights:
+        ore_iron:
+          probability: 0.2
+        ore_copper:
+          probability: 0.15
+        ore_gold:
+          probability: 0.05
+      skip: 0.6
+      high_limit: 38
+      low_limit: 64
+      smoothness: 2
+    - weights:
+        water:
+          probability: 0.1
+      skip: 0.6
+      high_limit: 70
+      low_limit: 74
+      smoothness: 1

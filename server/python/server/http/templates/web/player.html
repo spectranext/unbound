@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ server_title }} - {{ player.name }}</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #16181c;
+            --panel: #20242a;
+            --panel-alt: #252a31;
+            --border: #313741;
+            --text: #e7eaee;
+            --muted: #98a2b3;
+            --accent: #6f8fb8;
+            --accent-strong: #87a5cb;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            font-size: 13px;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .page {
+            max-width: 760px;
+            margin: 0 auto;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .window {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .titlebar {
+            background: var(--panel-alt);
+            color: var(--accent-strong);
+            padding: 8px 12px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .window-body {
+            padding: 12px;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-bottom: 12px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 4px 8px;
+            color: var(--text);
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            text-decoration: none;
+        }
+
+        .button:hover {
+            border-color: var(--accent);
+            color: var(--accent-strong);
+        }
+
+        .meta {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px 16px;
+        }
+
+        .label {
+            color: var(--muted);
+            font-size: 11px;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <section class="window">
+        <div class="titlebar">Player</div>
+        <div class="window-body">
+            <div class="toolbar">
+                <a class="button" href="{{ player.chat_url }}">Chat</a>
+                {% if player.team_url %}
+                <a class="button" href="{{ player.team_url }}">Manage Team</a>
+                {% endif %}
+                <a class="button" href="/web/{{ auth.server_hash }}/{{ auth.action }}?token={{ auth.token }}">Refresh</a>
+            </div>
+            <div class="meta">
+                <div>
+                    <div class="label">Name</div>
+                    <div>{{ player.name }}</div>
+                </div>
+                <div>
+                    <div class="label">User ID</div>
+                    <div>{{ player.user_id }}</div>
+                </div>
+                <div>
+                    <div class="label">Team</div>
+                    <div>{{ player.team_name or "none" }}</div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

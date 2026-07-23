@@ -1,0 +1,57 @@
+<html>
+<head>
+    <title>{{ cpu_name }}</title>
+    <script type="application/javascript" src="/static/jquery-3.7.1.min.js"></script>
+    <script type="application/javascript" src="/static/drop.js"></script>
+    <link rel="stylesheet" type="text/css" rel="noopener" target="_blank" href="/static/drop.css">
+    <link rel="stylesheet" type="text/css" rel="noopener" target="_blank" href="/static/terminal.css">
+</head>
+<body>
+
+<div class="container">
+
+    <table>
+        <tr>
+            <td>
+                <div class="window">
+                    <div class="icons"><span></span></div>
+                    <div class="title">Computer {{ cpu_name}}, status: {{ cpu_status }}</div>
+                    <pre><code id="logs"></code></pre>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 32px;">
+                <form class="form" method="post" action="/cpu/{{ cpu_hash }}/snapshot" enctype="multipart/form-data">
+                    <div class="file-upload-wrapper" data-text="Select SNA file (snapshot)">
+                        <input id="snapshot" name="snapshot" type="file" class="file-upload-field" value="">
+                    </div>
+                </form>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<script type="application/javascript">
+    $(function ()
+    {
+        var ws = new WebSocket("ws://localhost:8080/logs/{{ cpu_hash }}");
+        ws.onmessage = function(event) {
+            cpu_log(event.data);
+        };
+        ws.onerror = function (event) {
+            cpu_log("Error: " + event.data);
+        }
+        ws.onclose = function (event) {
+            cpu_log("Terminal session closed.");
+        }
+    });
+</script>
+
+{% if uploaded %}
+<a class="notification" href="#" target="_blank">
+    TAP file has been uploaded.
+</a>
+{% endif %}
+</body>
+</html>

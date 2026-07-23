@@ -1,0 +1,21 @@
+data:
+  - type: module
+    name: module_intro.bin
+    id: intro
+    extra:
+      NAMESPACE0: 0
+  - type: module
+    name: module_congrats.bin
+    id: congrats
+    extra:
+      NAMESPACE0: 0
+  - type: module
+    name: module_hiring.bin
+    id: hiring
+    extra:
+      NAMESPACE0: 0
+  - type: module
+    name: module_computer.bin
+    id: computer
+    extra:
+      NAMESPACE0: 0

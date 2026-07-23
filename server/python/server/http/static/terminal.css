@@ -1,0 +1,113 @@
+
+.window {
+    background: #ddd;
+    border-radius: 10px;
+    display: flex;
+    flex-flow: row wrap;
+    position: relative;
+    width: 800px;
+}
+
+.title {
+    flex: 1;
+    text-align: center;
+    padding: 0.75em;
+}
+
+.icons {
+    padding: 0.75em;
+    position: absolute;
+}
+.icons span {
+    background: #f4c025;
+}
+.icons:before {
+    content: "";
+    background: #e4514f;
+}
+.icons:after {
+    content: "";
+    background: #3ec930;
+}
+
+.icons span, .icons:before, .icons:after {
+    display: inline-block;
+    float: left;
+    width: 1em;
+    height: 1em;
+    border-radius: 50%;
+    margin-right: 0.5em;
+}
+
+pre {
+    background: #222;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    color: #fff;
+    overflow: scroll;
+    padding: 2.5em;
+    width: 100%;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+}
+pre code {
+    font: bold 1em/1.75 "Source Code Pro", monospace;
+}
+pre code:after {
+    -webkit-animation: blink 0.9s infinite;
+    animation: blink 0.9s infinite;
+    font: initial;
+    display: block;
+    opacity: 1;
+    content: "▋";
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.token.boolean,
+.token.number {
+    color: #8130c9;
+}
+
+.token.keyword {
+    color: #09a3d5;
+}
+
+.token.operator {
+    color: #e4514f;
+}
+
+@-webkit-keyframes blink {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+@media (max-width: 800px) {
+    pre {
+        font-size: 10px;
+    }
+
+    .window {
+        width: 70%;
+    }
+}

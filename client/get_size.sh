@@ -1,0 +1,1 @@
+cat build/client.map | grep addr | sed -n 's/^\([a-zA-Z0-9_]*\).*= .\([A-Z0-9]*\) ;.*,\(.*\)$/\2,\1,\3/p' | sort | python3 tools/symbol_sizes.py

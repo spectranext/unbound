@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ status_code }} | {{ title }}</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #16181c;
+            --panel: #20242a;
+            --panel-alt: #252a31;
+            --border: #313741;
+            --text: #e7eaee;
+            --muted: #98a2b3;
+            --accent: #d9a15d;
+            --accent-strong: #eab982;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            font-size: 13px;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .window {
+            width: min(100%, 720px);
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .titlebar {
+            background: var(--panel-alt);
+            color: var(--accent-strong);
+            padding: 10px 14px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .window-body {
+            padding: 18px;
+        }
+
+        .status {
+            display: inline-block;
+            margin-bottom: 12px;
+            padding: 5px 8px;
+            border-radius: 4px;
+            background: rgba(217, 161, 93, 0.14);
+            color: var(--accent-strong);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0 0 10px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <section class="window">
+        <div class="titlebar">Unbound Server API</div>
+        <div class="window-body">
+            <div class="status">{{ status_code }}</div>
+            <h1>{{ title }}</h1>
+            <p>{{ message }}</p>
+        </div>
+    </section>
+</main>
+</body>
+</html>

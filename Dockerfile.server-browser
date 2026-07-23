@@ -1,0 +1,54 @@
+FROM spectranext/sdk-alpine:latest AS sdk
+
+FROM alpine:latest
+
+COPY --from=sdk /sdk /sdk
+
+ENV SPECTRANEXT_SDK_PATH=/sdk
+
+RUN apk update && apk add --no-cache python3 python3-dev cmake git build-base python3 py3-pip py3-setuptools \
+    build-base perl zlib-dev m4 ragel bash
+RUN pip3 install Pillow pyYAML requests --break-system-packages
+
+RUN mkdir /sandbox && mkdir /sandbox/tnfsd/ && mkdir /sandbox/tnfsd/data && \
+    mkdir /sandbox/server-browser/ && mkdir /build && mkdir /build/client
+
+# common
+ADD common /build/common
+
+# server-browser
+COPY server-browser/CMakeLists.txt /build/server-browser/CMakeLists.txt
+COPY server-browser/include /build/server-browser/include
+COPY server-browser/src /build/server-browser/src
+COPY server-browser/data /build/server-browser/data
+COPY server-browser/loader /build/server-browser/loader
+COPY server-browser/data /build/server-browser/data
+COPY server-browser/progress_bar.bin /build/server-browser/progress_bar.bin
+COPY client/gui /build/client/gui
+COPY client/tools /build/client/tools
+COPY tnfsd /build/tnfsd
+RUN touch /build/server-browser/game_loader.asm
+
+ENV CLIENT_MODULES_BIN="/build/client/build"
+ENV DOCKER_BUILD="1"
+ENV PATH="/sdk/bin:/sdk/z88dk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+RUN /sdk/source.sh && mkdir /build/server-browser/build && cd /build/server-browser/build && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DZCCTARGET=zx -DCMAKE_TOOLCHAIN_FILE=/sdk/z88dk/share/z88dk/cmake/Toolchain-zcc.cmake .. && \
+    make game_loader && make game_loader_src_package && make server_browser && cp /build/server-browser/build/server_browser.bin /sandbox/tnfsd/data/
+
+RUN cd /build/tnfsd && make OS=LINUX
+
+FROM alpine:latest
+
+RUN apk update && apk add --no-cache python3 py3-pip py3-setuptools busybox-extras && pip3 install --break-system-packages Pillow pyYAML requests qrcode uvicorn fastapi==0.99.0 jinja2 python-multipart websockets
+
+EXPOSE 16384/udp
+
+COPY --from=1 /sandbox /sandbox
+COPY --from=1 /build/tnfsd/tnfsd /sandbox/tnfsd/tnfsd
+COPY server-browser/bin/boot.zx /sandbox/tnfsd/data
+RUN mkdir /statuses && touch /statuses/statuses.bin && ln -s /statuses/statuses.bin /sandbox/tnfsd/data/statuses.bin
+
+WORKDIR /sandbox/server
+CMD ["/sandbox/tnfsd/tnfsd", "/sandbox/tnfsd/data"]

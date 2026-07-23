@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ server_title }}</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #16181c;
+            --panel: #20242a;
+            --panel-alt: #252a31;
+            --border: #313741;
+            --text: #e7eaee;
+            --muted: #98a2b3;
+            --accent: #6f8fb8;
+            --accent-strong: #87a5cb;
+            --table-row: #1b1f25;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            font-size: 13px;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .page {
+            max-width: 1120px;
+            margin: 0 auto;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .window {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .titlebar {
+            background: var(--panel-alt);
+            color: var(--accent-strong);
+            padding: 8px 12px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .window-body {
+            padding: 12px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 4px 8px;
+            color: var(--text);
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            text-decoration: none;
+        }
+
+        .button:hover {
+            border-color: var(--accent);
+            color: var(--accent-strong);
+        }
+
+        .meta {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px 16px;
+            margin-bottom: 12px;
+        }
+
+        .label {
+            color: var(--muted);
+            font-size: 11px;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--table-row);
+            border: 1px solid var(--border);
+        }
+
+        th, td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+
+        th {
+            background: var(--panel-alt);
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <section class="window">
+        <div class="titlebar">Dashboard</div>
+        <div class="window-body">
+            <div class="toolbar">
+                <a class="button" href="{{ chat_url }}">Chat</a>
+                <a class="button" href="/web/{{ auth.server_hash }}/{{ auth.action }}?token={{ auth.token }}">Refresh</a>
+            </div>
+            <div class="meta">
+                <div>
+                    <div class="label">Server</div>
+                    <div>{{ server_title }}</div>
+                </div>
+                <div>
+                    <div class="label">Time of Day</div>
+                    <div>{{ time_of_day }}</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="window">
+        <div class="titlebar">Server Stats</div>
+        <div class="window-body">
+            <table>
+                <thead>
+                <tr>
+                    <th>Team</th>
+                    <th>Credits</th>
+                    <th>Manage</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for team in teams %}
+                <tr>
+                    <td>{{ team.name }}</td>
+                    <td>{{ team.credits }}</td>
+                    <td><a class="button" href="{{ team.manage_url }}">manage</a></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="window">
+        <div class="titlebar">Players</div>
+        <div class="window-body">
+            {% if players %}
+            <table>
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>User ID</th>
+                    <th>Team</th>
+                    <th>See</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for player in players %}
+                <tr>
+                    <td>{{ player.name }}</td>
+                    <td>{{ player.user_id }}</td>
+                    <td>{{ player.team_name or "none" }}</td>
+                    <td><a class="button" href="{{ player.see_url }}">see</a></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div>&lt;no players&gt;</div>
+            {% endif %}
+        </div>
+    </section>
+</main>
+</body>
+</html>

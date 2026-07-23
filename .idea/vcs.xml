@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/client/gui" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/common/proto" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/server/Z80" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/server/Zeta" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/server/uthash" vcs="Git" />
+  </component>
+</project>

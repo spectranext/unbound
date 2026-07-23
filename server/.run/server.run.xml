@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="server" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="--scenario default_no_login" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="zx_sandbox_server" TARGET_NAME="server" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="zx_sandbox_server" RUN_TARGET_NAME="server">
+    <envs>
+      <env name="PYTHONPATH" value="C:\Work\zx-sandbox\server\venv\Lib\site-packages" />
+      <env name="DEV_TNFS" value="127.10.0.1" />
+    </envs>
+    <method v="2">
+      <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>

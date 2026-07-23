@@ -1,0 +1,33 @@
+data:
+  - type: module
+    name: music/f24.pt3
+    id: demo
+    extra:
+      NAMESPACE0: 1
+      TITLE: "Haha"
+  - type: module
+    name: music/ingame1.pt3
+    id: music_ingame1
+    extra:
+      NAMESPACE0: 1
+      NAMESPACE1: 2
+      TITLE: "Ingame-1"
+    fill: 8192
+  - type: module
+    name: music/complete.pt3
+    id: complete
+    extra:
+      NAMESPACE0: 1
+      NAMESPACE1: 2
+      TITLE: "Der Karlito: Level Complete!"
+      LINK: "https://zxart.ee/eng/authors/r/riskej/der-karlito-level-complete/"
+    fill: 8192
+  - type: module
+    name: music/sad.pt3
+    id: sad
+    extra:
+      NAMESPACE0: 1
+      NAMESPACE1: 2
+      TITLE: "Captain Drexx - Game Over"
+      LINK: "https://zxart.ee/eng/authors/b/brightentayle/captain-drexx-game-over/"
+    fill: 8192

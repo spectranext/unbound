@@ -1,0 +1,12 @@
+FROM alpine:3.19.1
+
+RUN apk update && apk add --no-cache cmake git build-base python3 py3-pip py3-setuptools && \
+    pip3 install Pillow hypercorn aioredis redis flask fastapi python-multipart --break-system-packages
+
+RUN mkdir /runtime && mkdir /runtime/statuses
+COPY server-list-api/server /runtime/server
+
+ENV REDIS_HOST=redis
+ENV STATUSES=/runtime/statuses/statuses.bin
+WORKDIR /runtime
+CMD python3 -m server

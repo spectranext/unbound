@@ -1,0 +1,17 @@
+version: 1
+scenes:
+  scene:
+    - name: alert_text
+      type: label
+      boundaries: 12, 10, 15, 7
+      buffer: alert_text_data
+      buffer_size: 64
+      color: INK_RED | BRIGHT | PAPER_BLACK
+      flags: 0
+    - name: connect_btn
+      type: button
+      boundaries: 14, 12, 8, 1
+      key: 13
+      icon: GUI_ICON_RETURN
+      title: "Proceed"
+      callback: alert_connect
