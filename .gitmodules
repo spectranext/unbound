@@ -4,13 +4,13 @@
 	ignore = dirty
 [submodule "common/proto"]
 	path = common/proto
-	url = git@github.com:speccytools/zx-proto.git
+	url = https://github.com/speccytools/zx-proto.git
 [submodule "client/gui"]
 	path = client/gui
-	url = git@github.com:speccytools/zxgui.git
+	url = https://github.com/speccytools/zxgui.git
 [submodule "server/Z80"]
 	path = server/Z80
-	url = git@github.com:desertkun/Z80.git
+	url = https://github.com/desertkun/Z80.git
 [submodule "server/Zeta"]
 	path = server/Zeta
 	url = https://github.com/redcode/Zeta.git
