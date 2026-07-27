@@ -12,6 +12,7 @@
 #include "hud.h"
 #include "client_net.h"
 #include "client_auth.h"
+#include "modules.h"
 
 static uint8_t disconnected_alert_visible = 0;
 
@@ -80,7 +81,7 @@ void panel_open()
 
 void panel_close()
 {
-    zxgui_scene_set(NULL);
+    module_scene_clear();
     panel = 0;
     rendering_blocked = 0;
     client_map_b.screen_dirty = 1;

@@ -8,6 +8,7 @@
 #include "soundfx.h"
 #include "notifications.h"
 #include "hud.h"
+#include "modules.h"
 
 static void send_msg();
 extern char send_buffer[64];
@@ -37,7 +38,7 @@ static void send_msg()
     zxgui_screen_color(INK_WHITE | PAPER_BLACK);
     zxgui_screen_clear(0, 23, 32, 1);
 
-    zxgui_scene_set(NULL);
+    module_scene_clear();
     notification_state = NOTIFICATION_STATE_NONE;
     control_mode = CONTROL_MODE_MOVE;
     update_target_marker();
@@ -46,6 +47,7 @@ static void send_msg()
 
 void init_terminal()
 {
+    memset(send_buffer, 0, sizeof(send_buffer));
 }
 
 void switch_terminal()
@@ -53,5 +55,6 @@ void switch_terminal()
     notification_state = NOTIFICATION_STATE_BLOCKED;
     control_mode = CONTROL_MODE_PANEL;
     disable_target_marker();
+    current_scene_module = MODULE_NONE;
     zxgui_scene_set(&scene);
 }

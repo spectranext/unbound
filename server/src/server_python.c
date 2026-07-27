@@ -476,7 +476,6 @@ void server_python_assign_py_player_callbacks(struct server_python_t* server_pyt
     ASSIGN_CLIENT_CALLBACK(client_state, "notify", client_api_notify_Type, client_pyton_obj);
     ASSIGN_CLIENT_CALLBACK(client_state, "disconnect", client_api_disconnect_Type, client_pyton_obj);
     ASSIGN_CLIENT_CALLBACK(client_state, "sync_stats", client_api_sync_stats_Type, client_pyton_obj);
-    ASSIGN_CLIENT_CALLBACK(client_state, "force_query", client_api_force_query_Type, client_pyton_obj);
     ASSIGN_CLIENT_CALLBACK(client_state, "send_chat_message", client_api_send_chat_message_Type, client_pyton_obj);
     ASSIGN_CLIENT_CALLBACK(client_state, "push_module", client_api_push_module_Type, client_pyton_obj);
     ASSIGN_CLIENT_CALLBACK(client_state, "list_modules", client_api_list_modules_Type, client_pyton_obj);
@@ -1091,13 +1090,6 @@ void server_python_client_free(struct server_python_t* server_python, struct cli
         client_state->py = NULL;
     }
 
-    if (client_state->py_last_query_response)
-    {
-        Py_DecRef(client_state->py_last_query_response);
-        client_state->py_last_query_response = NULL;
-        client_printf(client_state, "freed py object for query\n");
-    }
-
     if (client_state->py_postponed_touch)
     {
         Py_DecRef(client_state->py_postponed_touch);
@@ -1105,146 +1097,9 @@ void server_python_client_free(struct server_python_t* server_python, struct cli
     }
 }
 
-static uint8_t generate_player_query_response(struct server_python_t* server_python,
-    struct client_state_t* client_state, struct player_query_result* result)
-{
-    result->message = NULL;
-    result->description = NULL;
-    result->cancel_action = NULL;
-    result->edit = 0;
-    result->flags = 0;
-    result->quick_cancel = 0;
-    result->actions = NULL;
-    result->actions_count = 0;
-    result->options = NULL;
-    result->options_count = 0;
-
-    result->message = strdup(PyBytes_AS_STRING(PyObject_GetAttrString(client_state->py_last_query_response, "message")));
-    result->cancel_action = strdup(PyBytes_AS_STRING(PyObject_GetAttrString(
-        client_state->py_last_query_response, "cancel_action")));
-
-    PyObject* image = PyObject_GetAttrString(client_state->py_last_query_response, "image");
-    if (PyBytes_Check(image))
-    {
-        char* s; Py_ssize_t len;
-        PyBytes_AsStringAndSize(image, &s, &len);
-        result->image = malloc(len);
-        result->image_size = len;
-        memcpy(result->image, s, len);
-    }
-    else
-    {
-        result->image = NULL;
-        result->image_size = 0;
-    }
-
-    PyObject* description = PyObject_GetAttrString(client_state->py_last_query_response, "description");
-    if (description != Py_None)
-    {
-        result->description = strdup(PyBytes_AS_STRING(description));
-    }
-
-    result->flags = PyLong_AsLong(PyObject_GetAttrString(client_state->py_last_query_response, "flags"));
-
-    if (PyObject_IsTrue(PyObject_GetAttrString(client_state->py_last_query_response, "edit")))
-    {
-        result->edit = 1;
-    }
-
-    if (PyObject_IsTrue(PyObject_CallMethod(client_state->py_last_query_response, "quick_cancel", "")))
-    {
-        result->quick_cancel = 1;
-    }
-
-    PyObject* options = PyObject_GetAttrString(client_state->py_last_query_response, "options");
-    if (options != Py_None)
-    {
-        result->options_count = PyList_Size(options);
-        for (Py_ssize_t i = 0; i < result->options_count; i++)
-        {
-            struct player_query_option_t* o = calloc(1, sizeof(struct player_query_option_t));
-            PyObject* item = PyList_GetItem(options, i);
-            PyObject* bytes = PyObject_Bytes(item);
-            if (server_python_check_err())
-            {
-                server_python_player_free_query_result(result);
-                return 1;
-            }
-            {
-                PyObject* icon = PyObject_CallMethod(item, "icon", "");
-                if (PyBytes_Check(icon))
-                {
-                    o->has_full_icon = 1;
-                    memcpy(o->full_icon, PyBytes_AsString(icon), sizeof(o->full_icon));
-                }
-                else
-                {
-                    o->icon = PyLong_AsLong(icon);
-                }
-            }
-            o->secondary = Py_IsTrue(PyObject_CallMethod(item, "secondary", ""));
-            o->option = strdup(PyBytes_AS_STRING(bytes));
-            Py_DecRef(bytes);
-            LL_APPEND(result->options, o);
-        }
-
-        result->current_option = PyLong_AsLong(PyObject_GetAttrString(client_state->py_last_query_response, "current"));
-    }
-    else
-    {
-        result->options_count = 0;
-    }
-
-    {
-        PyObject* actions = PyObject_GetAttrString(client_state->py_last_query_response, "actions");
-        result->actions_count = PyList_Size(actions);
-        for (size_t i = 0; i < result->actions_count; i++)
-        {
-            struct player_query_action_t* o = calloc(1, sizeof(struct player_query_action_t));
-            o->action = strdup(PyBytes_AS_STRING(PyList_GetItem(actions, i)));
-            LL_APPEND(result->actions, o);
-        }
-    }
-
-    return 0;
-}
-
-uint8_t server_python_player_force_query(struct server_python_t* server_python,
-    struct client_state_t* client_state, PyObject* response,
-    struct player_query_result* result)
-{
-    if (client_state->py_last_query_response)
-    {
-        Py_DecRef(client_state->py_last_query_response);
-        client_state->py_last_query_response = NULL;
-    }
-
-    client_state->py_last_query_response = response;
-
-    if (client_state->py_last_query_response == Py_None)
-    {
-        client_state->py_last_query_response = NULL;
-        server_python_unblock_notifications(server_python, client_state, "query");
-        return 4;
-    }
-
-    server_python_block_notifications(server_python, client_state, "query");
-
-    Py_IncRef(client_state->py_last_query_response);
-
-    if (generate_player_query_response(server_python, client_state, result))
-    {
-        return 5;
-    }
-
-    return 0;
-}
-
 uint8_t server_python_player_query(struct server_python_t* server_python,
-    struct client_state_t* client_state, const char* query,
-    struct player_query_result* result)
+    struct client_state_t* client_state, const char* query)
 {
-
     struct server_object_reference_t* ref = server_map_get_object(
         &server_python->server_state->map, server_state_client_active_object(client_state));
 
@@ -1258,180 +1113,56 @@ uint8_t server_python_player_query(struct server_python_t* server_python,
         return 2;
     }
 
-    if (client_state->py_last_query_response)
-    {
-        Py_DecRef(client_state->py_last_query_response);
-        client_state->py_last_query_response = NULL;
-    }
-
-    client_state->py_last_query_response = PyObject_CallMethod(ref->py_object, "on_query", "y", query);
+    PyObject* result = PyObject_CallMethod(ref->py_object, "on_query", "y", query);
     if (server_python_check_err())
     {
         return 3;
     }
 
-    if (client_state->py_last_query_response == Py_None)
-    {
-        client_state->py_last_query_response = NULL;
-        server_python_unblock_notifications(server_python, client_state, "query");
-        return 0xFF;
-    }
-
-    Py_IncRef(client_state->py_last_query_response);
-
-    server_python_block_notifications(server_python, client_state, "query");
-
-    if (generate_player_query_response(server_python, client_state, result))
-    {
-        return 5;
-    }
+    Py_XDECREF(result);
 
     return 0;
 }
 
 uint8_t server_python_player_query_option(struct server_python_t* server_python,
-    struct client_state_t* client_state, size_t option, const char* action,
-    struct player_query_result* new_result)
+    struct client_state_t* client_state, size_t option, const char* action)
 {
-    if (client_state->py_last_query_response == NULL)
+    struct server_object_reference_t* ref = server_map_get_object(
+        &server_python->server_state->map, server_state_client_active_object(client_state));
+    PyObject* result;
+
+    if (ref == NULL)
     {
-        return 1;
+        if (client_state->py == NULL)
+        {
+            return 1;
+        }
+
+        result = PyObject_CallMethod(client_state->py, "on_query_option", "iy", option, action);
+
+        if (server_python_check_err())
+        {
+            return 3;
+        }
+
+        Py_XDECREF(result);
+
+        return 0;
     }
 
-    PyObject* new_feedback;
-
-    // cancel the query
-    if (strlen(action) == 0)
-    {
-        new_feedback = PyObject_CallMethod(client_state->py_last_query_response, "cancelled", "");
-    }
-    else
-    {
-        new_feedback = PyObject_CallMethod(client_state->py_last_query_response, "selected", "iy", option, action);
-    }
-
-    if (server_python_check_err())
-    {
-        server_python_player_free_query_result(new_result);
-        return 5;
-    }
-
-    if (new_feedback != Py_None)
-    {
-        Py_DecRef(client_state->py_last_query_response);
-        client_state->py_last_query_response = new_feedback;
-        server_python_block_notifications(server_python, client_state, "query");
-
-        new_result->message = strdup(PyBytes_AS_STRING(PyObject_GetAttrString(new_feedback, "message")));
-        new_result->cancel_action = strdup(PyBytes_AS_STRING(PyObject_GetAttrString(new_feedback, "cancel_action")));
-
-        PyObject* image = PyObject_GetAttrString(client_state->py_last_query_response,  "image");
-        if (PyBytes_Check(image))
-        {
-            char* s; Py_ssize_t len;
-            PyBytes_AsStringAndSize(image, &s, &len);
-            new_result->image = malloc(len);
-            new_result->image_size = len;
-            memcpy(new_result->image, s, len);
-        }
-        else
-        {
-            new_result->image = NULL;
-            new_result->image_size = 0;
-        }
-
-        PyObject* description = PyObject_GetAttrString(new_feedback, "description");
-        if (description != Py_None)
-        {
-            if (PyBytes_Check(description))
-            {
-                new_result->description = strdup(PyBytes_AS_STRING(description));
-            }
-        }
-
-        new_result->flags = PyLong_AsLong(PyObject_GetAttrString(new_feedback, "flags"));
-
-        if (PyObject_IsTrue(PyObject_GetAttrString(new_feedback, "edit")))
-        {
-            new_result->edit = 1;
-        }
-
-        if (PyObject_IsTrue(PyObject_CallMethod(new_feedback, "quick_cancel", "")))
-        {
-            new_result->quick_cancel = 1;
-        }
-
-        PyObject* options = PyObject_GetAttrString(new_feedback, "options");
-        if (options != Py_None)
-        {
-            new_result->options_count = PyList_Size(options);
-            for (Py_ssize_t i = 0; i < new_result->options_count; i++)
-            {
-                struct player_query_option_t* o = calloc(1, sizeof(struct player_query_option_t));
-
-                PyObject* item = PyList_GetItem(options, i);
-                PyObject* bytes = PyObject_Bytes(item);
-                if (server_python_check_err())
-                {
-                    server_python_player_free_query_result(new_result);
-                    return 4;
-                }
-                {
-                    PyObject* icon = PyObject_CallMethod(item, "icon", "");
-                    if (PyBytes_Check(icon))
-                    {
-                        o->has_full_icon = 1;
-                        memcpy(o->full_icon, PyBytes_AsString(icon), sizeof(o->full_icon));
-                    }
-                    else
-                    {
-                        o->icon = PyLong_AsLong(icon);
-                    }
-                }
-                o->secondary = Py_IsTrue(PyObject_CallMethod(item, "secondary", ""));
-                o->option = strdup(PyBytes_AS_STRING(bytes));
-                Py_DecRef(bytes);
-                LL_APPEND(new_result->options, o);
-            }
-
-            new_result->current_option = PyLong_AsLong(PyObject_GetAttrString(new_feedback, "current"));
-        }
-        else
-        {
-            new_result->options_count = 0;
-        }
-
-        {
-            PyObject* actions = PyObject_GetAttrString(new_feedback, "actions");
-            new_result->actions_count = PyList_Size(actions);
-            for (size_t i = 0; i < new_result->actions_count; i++)
-            {
-                struct player_query_action_t* o = calloc(1, sizeof(struct player_query_action_t));
-                o->action = strdup(PyBytes_AS_STRING(PyList_GetItem(actions, i)));
-                LL_APPEND(new_result->actions, o);
-            }
-        }
-    }
-    else
-    {
-        new_result->image = NULL;
-        new_result->image_size = 0;
-        new_result->message = NULL;
-
-        if (client_state->py_last_query_response)
-        {
-            Py_DecRef(client_state->py_last_query_response);
-            client_state->py_last_query_response = NULL;
-            server_python_unblock_notifications(server_python, client_state, "query");
-
-            server_python_client_set_object_state_default(client_state);
-        }
-    }
-
-    if (server_python_check_err())
+    if (ref->py_object == NULL)
     {
         return 2;
     }
+
+    result = PyObject_CallMethod(ref->py_object, "on_query_option", "iy", option, action);
+
+    if (server_python_check_err())
+    {
+        return 3;
+    }
+
+    Py_XDECREF(result);
 
     return 0;
 }
@@ -1461,53 +1192,6 @@ void server_python_player_get_stats(struct server_python_t* server_python,
     *hit_delay = PyLong_AsLong(PyObject_GetAttrString(ref->py_object, "hit_delay"));
     strcpy(default_state, PyBytes_AS_STRING(PyObject_GetAttrString(ref->py_object, "default_state")));
     strcpy(building_state, PyBytes_AS_STRING(PyObject_GetAttrString(ref->py_object, "building_state")));
-}
-
-void server_python_player_free_query_result(struct player_query_result* result)
-{
-    if (result->description)
-    {
-        free(result->description);
-        result->description = NULL;
-    }
-    if (result->cancel_action)
-    {
-        free(result->cancel_action);
-        result->cancel_action = NULL;
-    }
-    if (result->image)
-    {
-        free(result->image);
-        result->image = NULL;
-    }
-    free(result->message);
-
-    result->edit = 0;
-    result->flags = 0;
-    result->quick_cancel = 0;
-
-    {
-        struct player_query_option_t* elem;
-        struct player_query_option_t* tmp;
-
-        LL_FOREACH_SAFE(result->options, elem, tmp)
-        {
-            LL_DELETE(result->options, elem);
-            free(elem->option);
-            free(elem);
-        }
-    }
-    {
-        struct player_query_action_t* elem;
-        struct player_query_action_t* tmp;
-
-        LL_FOREACH_SAFE(result->actions, elem, tmp)
-        {
-            LL_DELETE(result->actions, elem);
-            free(elem->action);
-            free(elem);
-        }
-    }
 }
 
 uint8_t server_python_map_serialize_block(struct server_map_chunk_t* chunk, uint8_t x, uint8_t y,

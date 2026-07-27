@@ -32,6 +32,8 @@ class WeaponState(Enum):
 
 class Client(ClientAPI):
     def __init__(self, client_id: int):
+        from .. query.session import QuerySession
+
         super().__init__(client_id)
         scenario = get_scenario(MapAPI.instance.scenario)
         self.tutorial: bool = not scenario.tutorial
@@ -44,12 +46,22 @@ class Client(ClientAPI):
         self.weapon_state: WeaponState = WeaponState.WEAPON_NORMAL
         self.weapon_reloading_timer: Optional[float] = None
         self.player: Optional['PlayerObject'] = None
+        self.query_session = QuerySession(None, self)
         self.welcome_email_sent: bool = False
         # Invulnerability during first status/tutorial after new-client ship spawn (not manual menu tutorial).
         self.spawn_tutorial_god: bool = False
 
     def get_inventory(self) -> Inventory:
         return self.inventory
+
+    def force_query(self, response: Optional[QueryResponse]):
+        if self.player is not None:
+            self.player.force_query(response)
+        else:
+            self.query_session.force(response)
+
+    def on_query_option(self, option: int, action: bytes):
+        self.query_session.option(option, action)
 
     def get_selected_record(self) -> Optional[InventoryRecord]:
         return self.selected_record

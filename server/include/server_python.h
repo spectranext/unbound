@@ -103,51 +103,10 @@ extern uint8_t server_python_client_auth(struct server_python_t* server_python,
 extern void server_python_map_serialize(struct server_python_t* server_python, const char* path);
 extern void server_python_map_deserialize(struct server_python_t* server_python, const char* path);
 
-struct player_query_option_t
-{
-    char* option;
-    union {
-        uint8_t icon;
-        uint8_t full_icon[9];
-    };
-    uint8_t has_full_icon;
-    uint8_t secondary;
-    struct player_query_option_t* next;
-};
-
-struct player_query_action_t
-{
-    char* action;
-    struct player_query_action_t* next;
-};
-
-struct player_query_result
-{
-    char* message;
-    char* description;
-    char* cancel_action;
-    uint8_t edit;
-    uint8_t flags;
-    uint8_t* image;
-    uint16_t image_size;
-    struct player_query_option_t* options;
-    size_t options_count;
-    size_t current_option;
-    struct player_query_action_t* actions;
-    size_t actions_count;
-    uint8_t quick_cancel;
-};
-
 extern uint8_t server_python_player_query(struct server_python_t* server_python,
-    struct client_state_t* client_state, const char* query,
-    struct player_query_result* result);
-extern uint8_t server_python_player_force_query(struct server_python_t* server_python,
-    struct client_state_t* client_state, PyObject* response,
-    struct player_query_result* result);
+    struct client_state_t* client_state, const char* query);
 extern uint8_t server_python_player_query_option(struct server_python_t* server_python,
-    struct client_state_t* client_state, size_t option, const char* action,
-    struct player_query_result* new_result);
-extern void server_python_player_free_query_result(struct player_query_result* result);
+    struct client_state_t* client_state, size_t option, const char* action);
 
 extern void server_python_player_get_stats(struct server_python_t* server_python,
     struct client_state_t* client_state, uint8_t* health, uint8_t* power, uint8_t* temperature,
@@ -295,7 +254,6 @@ PyObject* client_api_get_module_prop_str_cb(PyObject *callable, PyObject *args, 
 PyObject* client_api_push_screen_cb(PyObject *callable, PyObject *args, PyObject *kwargs);
 PyObject* client_api_push_memory_cb(PyObject *callable, PyObject *args, PyObject *kwargs);
 PyObject* client_api_module_action_cb(PyObject *callable, PyObject *args, PyObject *kwargs);
-PyObject* client_api_force_query_cb(PyObject *callable, PyObject *args, PyObject *kwargs);
 PyObject* client_api_force_watch_cb(PyObject *callable, PyObject *args, PyObject *kwargs);
 PyObject* client_api_send_chat_message_cb(PyObject *callable, PyObject *args, PyObject *kwargs);
 PyObject* client_api_get_name_cb(PyObject *callable, PyObject *args, PyObject *kwargs);
@@ -480,7 +438,6 @@ DEFINE_SERVER_CALLBACK("print", server_print_Type, server_pyton_obj, server_prin
 DEFINE_SERVER_CALLBACK("ClientAPI.notify", client_api_notify_Type, client_pyton_obj, client_api_notify_cb)
 DEFINE_SERVER_CALLBACK("ClientAPI.disconnect", client_api_disconnect_Type, client_pyton_obj, client_api_disconnect_cb)
 DEFINE_SERVER_CALLBACK("ClientAPI.sync_stats", client_api_sync_stats_Type, client_pyton_obj, client_api_sync_stats_cb)
-DEFINE_SERVER_CALLBACK("ClientAPI.force_query", client_api_force_query_Type, client_pyton_obj, client_api_force_query_cb)
 DEFINE_SERVER_CALLBACK("ClientAPI.send_chat_message", client_api_send_chat_message_Type, client_pyton_obj, client_api_send_chat_message_cb)
 DEFINE_SERVER_CALLBACK("ClientAPI.push_module", client_api_push_module_Type, client_pyton_obj, client_api_push_module_cb)
 DEFINE_SERVER_CALLBACK("ClientAPI.list_modules", client_api_list_modules_Type, client_pyton_obj, client_api_list_modules_cb)

@@ -441,29 +441,9 @@ static void client_message_progress(ProtoObject* object) __z88dk_fastcall
     }
 }
 
-static enum {
-    EXTRA_OBJ_REASON_NONE = 0,
-    EXTRA_OBJ_REASON_FORCE_QUERY
-} extra_object_reason = EXTRA_OBJ_REASON_NONE;
-
-static uint8_t client_force_query_result_empty(ProtoObject* object) __z88dk_fastcall
-{
-    return get_uint8_property(object, 'z', 0);
-}
-
 static void client_message_force_query_result(ProtoObject* object) __z88dk_fastcall
 {
-    if (client_force_query_result_empty(object))
-    {
-        query_close_if_active();
-        return;
-    }
-
-    extra_object_reason = EXTRA_OBJ_REASON_FORCE_QUERY;
-    zxgui_clear();
-    switch_query_forced();
-    query_object_callback(0, object);
-    soundfx(FX_ITEM_6);
+    (void)object;
 }
 
 static void client_watch(ProtoObject* object) __z88dk_fastcall
@@ -531,8 +511,10 @@ static void music_init() __naked
 
 static void client_module_action(ProtoObject* object) __z88dk_fastcall
 {
-    // ignore for now
-    switch(get_uint8_property(object, 'n', 0))
+    static uint8_t namespace;
+    namespace = get_uint8_property(object, 'n', 0);
+
+    switch(namespace)
     {
         case NAMESPACE_MUSIC0:
         {
@@ -557,7 +539,8 @@ static void client_module_action(ProtoObject* object) __z88dk_fastcall
         case NAMESPACE_CODE:
         default:
         {
-            setpagea(SPECTRANET_MODULES_NAMESPACE0);
+            module_call_namespace = namespace;
+            setpagea(SPECTRANET_MODULES_NAMESPACE0 + namespace);
             module_action(object);
             get_objects_a();
 
@@ -658,36 +641,12 @@ void client_message_object(ProtoObject* object, void* user)
     }
     else
     {
-        switch (extra_object_reason)
-        {
-            case EXTRA_OBJ_REASON_FORCE_QUERY:
-            {
-                query_object_callback(process_proto.recv_objects_num, object);
-                break;
-            }
-            case EXTRA_OBJ_REASON_NONE:
-            default:
-            {
-                cb(object);
-                break;
-            }
-        }
+        cb(object);
     }
 }
 
 const char* client_message_complete(void* user)
 {
-    switch (extra_object_reason)
-    {
-        case EXTRA_OBJ_REASON_FORCE_QUERY:
-        {
-            query_complete_callback();
-            break;
-        }
-    }
-
-    extra_object_reason = EXTRA_OBJ_REASON_NONE;
-
     return NULL;
 }
 

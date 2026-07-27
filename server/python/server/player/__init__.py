@@ -39,6 +39,8 @@ class PlayerObject(ObjectAPI):
     PLAYER_STATE_GUN_180 = 6
 
     def __init__(self, player_id: int, c: Client):
+        from .. query.session import QuerySession
+
         super(PlayerObject, self).__init__(ObjectAPI.OBJECT_TYPE_PLAYER, ObjectAPI.DATA_ENTRY_CHAR1,
                                            ObjectAPI.DATA_ENTRY_CHAR1_MOVING,
                                            ObjectAPI.DATA_ENTRY_CHAR1_PICKING)
@@ -57,6 +59,7 @@ class PlayerObject(ObjectAPI):
         self.picking_state = False
         self.pressure = False
         self.god = False
+        self.query_session = QuerySession(self, self.client)
 
     def identity(self) -> bytes:
         return PlayerObject.PLAYER
@@ -535,9 +538,15 @@ class PlayerObject(ObjectAPI):
     def on_touch(self, x: int, y: int) -> Union[None, PostponedTouch]:
         return hit.touch(self, x, y)
 
-    def on_query(self, q: bytes) -> Optional[QueryResponse]:
+    def force_query(self, response: Optional[QueryResponse]):
+        self.query_session.force(response)
+
+    def on_query(self, q: bytes):
         from .. query import query
-        return query(self, q, 4)
+        self.query_session.query(q, lambda: query(self, q, 4))
+
+    def on_query_option(self, option: int, action: bytes):
+        self.query_session.option(option, action)
 
 
 def allocate_player(player_id: int, c: ClientAPI):

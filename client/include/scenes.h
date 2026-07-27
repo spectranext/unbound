@@ -13,10 +13,5 @@ extern void switch_alert(const char* progress_message);
 extern void switch_chat();
 extern void switch_terminal();
 extern void switch_query(const char* query) __z88dk_fastcall;
-extern void switch_query_forced();
-extern void query_close_if_active();
-
-extern void query_object_callback(uint8_t index, ProtoObject* object);
-extern void query_complete_callback();
 
 #endif

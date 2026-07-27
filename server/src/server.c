@@ -181,7 +181,6 @@ static uint8_t server_state_client_state_init(struct client_state_t* state,
     pthread_mutex_init(&state->post_wait.mutex, NULL);
     pthread_cond_init(&state->post_wait.cond, NULL);
 
-    state->py_last_query_response = NULL;
     state->py_postponed_touch = NULL;
 
     LL_APPEND(server_state->client_states, state);
@@ -523,120 +522,6 @@ void server_state_client_set_watch(struct client_state_t* state, struct server_s
 
         state->watch_active = 1;
     }
-}
-
-void server_state_client_force_query_result(struct client_state_t* state, struct server_state_t* server_state,
-    struct player_query_result* result)
-{
-    uint8_t options_count = 0;
-    {
-        struct player_query_option_t* option = result->options;
-        while (option)
-        {
-            option = option->next;
-            options_count++;
-        }
-    }
-
-    ProtoObject** objects = malloc(sizeof(ProtoObject*) * (options_count + 1));
-
-
-    // first object has a bunch of actions
-    {
-        ProtoStackObjectProperty actions[result->actions_count];
-        memset(&actions, 0, sizeof(actions));
-        ProtoStackObjectProperty* prev = NULL;
-
-        struct player_query_action_t* action = result->actions;
-        size_t i = 0;
-        while (action)
-        {
-            ProtoStackObjectProperty* prop = &actions[i++];
-            prop->key = 'a';
-            prop->value = action->action;
-            prop->value_size = strlen(action->action);
-
-            prop->prev = prev;
-            prev = prop;
-            action = action->next;
-        }
-
-        uint8_t primary = 0;
-        uint8_t secondary = 0;
-
-        {
-            struct player_query_option_t* option = result->options;
-            while (option)
-            {
-                if (option->secondary)
-                {
-                    secondary = 1;
-                }
-                else
-                {
-                    primary = 1;
-                }
-                option = option->next;
-            }
-        }
-
-        if (secondary && (!primary))
-        {
-            struct player_query_option_t* option = result->options;
-            while (option)
-            {
-                option->secondary = 0;
-                option = option->next;
-            }
-
-            secondary = 0;
-        }
-
-        declare_str_property_on_stack(cancel_action, 'x', result->cancel_action, prev);
-        declare_str_property_on_stack(message, 'm', result->message, &cancel_action);
-        uint8_t cc = result->current_option;
-        declare_arg_property_on_stack(current_option, 'c', cc, &message);
-
-        declare_arg_property_on_stack(_secondary, 's', secondary, &current_option);
-        declare_arg_property_on_stack(edit, 'e', result->edit, &_secondary);
-        declare_arg_property_on_stack(quick_cancel, 'q', result->quick_cancel, &edit);
-
-        if (result->description)
-        {
-            declare_str_property_on_stack(desctiption, 'd', result->description, &quick_cancel);
-            declare_variable_property_on_stack(image, 'I', result->image, result->image_size, &desctiption);
-            declare_arg_property_on_stack(flags, 'f', result->flags, &image);
-            uint8_t command = MSG_FORCE_QUERY_RESULT;
-            declare_arg_property_on_stack(id, OBJ_PROPERTY_ID, command, &flags);
-            objects[0] = proto_object_allocate(&id);
-        }
-        else
-        {
-            declare_variable_property_on_stack(image, 'I', result->image, result->image_size, &quick_cancel);
-            declare_arg_property_on_stack(flags, 'f', result->flags, &image);
-            uint8_t command = MSG_FORCE_QUERY_RESULT;
-            declare_arg_property_on_stack(id, OBJ_PROPERTY_ID, command, &flags);
-            objects[0] = proto_object_allocate(&id);
-        }
-    }
-
-    {
-        struct player_query_option_t* option = result->options;
-        uint8_t i = 0;
-        while (option)
-        {
-            declare_arg_property_on_stack(id, 'i', i, NULL);
-            declare_arg_property_on_stack(icon, 'c', option->icon, &id);
-            declare_arg_property_on_stack(full_icon, 'c', option->full_icon, &id);
-            declare_arg_property_on_stack(secondary, 's', option->secondary, option->has_full_icon ? &full_icon : &icon);
-            declare_str_property_on_stack(o, 'o', option->option, &secondary);
-            objects[i + 1] = proto_object_allocate(&o);
-            option = option->next;
-            i++;
-        }
-    }
-
-    client_state_send_proto_objects(server_state, state, objects, options_count + 1);
 }
 
 extern void server_state_client_sync_state(struct client_state_t* state, struct server_state_t* server_state,

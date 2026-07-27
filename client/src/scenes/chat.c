@@ -6,9 +6,10 @@
 #include "state.h"
 #include "messages.h"
 #include "soundfx.h"
+#include "modules.h"
 
 static void send_msg();
-char send_buffer[64];
+extern char send_buffer[64];
 
 static struct gui_scene_t scene;
 static struct gui_label_t chat = zxgui_label_init(NULL, 0, 1, 32, 1, "Chat", INK_CYAN | BRIGHT | PAPER_BLACK, 0);
@@ -102,6 +103,8 @@ void char_msg(const char* msg, uint16_t len) __z88dk_fastcall
 
 void init_chat()
 {
+    memset(send_buffer, 0, sizeof(send_buffer));
+
     zxgui_scene_init(&scene);
     {
         zxgui_scene_add(&scene, &chat);
@@ -119,5 +122,6 @@ void init_chat()
 void switch_chat()
 {
     refresh_chat();
+    current_scene_module = MODULE_NONE;
     zxgui_scene_set(&scene);
 }

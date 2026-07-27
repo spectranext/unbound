@@ -362,7 +362,6 @@ struct client_state_t
     struct client_proto_send_job_t* proto_send_jobs;
     uint16_t synced_objects[MAX_CLIENT_CACHED_OBJECTS];
     uint8_t synced_chunks[CLIENT_MAX_SYNCED_CHUNKS];
-    PyObject* py_last_query_response;
     PyObject* py_postponed_touch;
     uint32_t py_postponed_touch_progress;
     struct client_object_sync_queue_t* object_sync_queue;
@@ -400,9 +399,6 @@ extern void client_state_notify_message(struct server_state_t* server_state, str
 
 extern void server_state_client_send_effect(struct client_state_t* state, struct server_state_t* server_state,
     const char* effect, uint16_t x, uint16_t y);
-
-extern void server_state_client_force_query_result(struct client_state_t* state, struct server_state_t* server_state,
-    struct player_query_result* result);
 
 extern void server_state_client_set_watch(struct client_state_t* state, struct server_state_t* server_state,
     uint8_t chunk_x, uint8_t chunk_y);

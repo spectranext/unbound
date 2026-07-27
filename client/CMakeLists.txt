@@ -39,7 +39,7 @@ set(CLIENT_PRAGMAS
     -pragma-define=nostreams=1
     -pragma-define=CLIB_FOPEN_MAX=-1
     -pragma-define=CLIB_MALLOC_HEAP_SIZE=0
-    -pragma-define=REGISTER_SP=24999)
+    -pragma-define=REGISTER_SP=65020)
 
 set(CLIENT_EXECUTABLE_SOURCES
     ${CLIENT_ASM_SOURCES}

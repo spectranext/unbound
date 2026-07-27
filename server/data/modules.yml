@@ -19,3 +19,8 @@ data:
     id: computer
     extra:
       NAMESPACE0: 0
+  - type: module
+    name: module_query.bin
+    id: query
+    extra:
+      NAMESPACE0: 0

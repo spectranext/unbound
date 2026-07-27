@@ -29,6 +29,11 @@ enum server_to_client
     MSG_BULLET
 };
 
+#define QUERY_MODULE_BEGIN      1
+#define QUERY_MODULE_OPTION     2
+#define QUERY_MODULE_COMPLETE   3
+#define QUERY_MODULE_CLOSE      4
+
 #ifdef SPECTRUM
 #define PACKED__
 #else

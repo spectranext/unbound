@@ -81,15 +81,17 @@ ProtoObject* py_dict_to_proto_object(PyObject* py_dict, ProtoStackObjectProperty
     {
         ProtoStackObjectProperty* p = &attrs_properties[current_idx];
 
-        char* s = PyBytes_AsString(value);
+        char* s;
+        Py_ssize_t size;
+        PyBytes_AsStringAndSize(value, &s, &size);
 
-        if (strlen(s) == 0)
+        if (size == 0)
             continue;
 
         p->prev = prev;
         p->key = *PyBytes_AsString(key);
         p->value = s;
-        p->value_size = strlen(s);
+        p->value_size = size;
 
         prev = p;
         current_idx++;

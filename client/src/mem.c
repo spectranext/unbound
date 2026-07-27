@@ -10,7 +10,6 @@ struct proto_req_processor_t proto_req_processor = {};
 struct client_map_effects_t map_effects = {};
 struct map_client_object_t map_objects[MAX_CLIENT_CACHED_OBJECTS] = {};
 uint8_t map_objects_last_known_size = 0;
-struct particle_t particles[MAX_PARTICLES];
 
 /*
  * MEMORY MAP
@@ -23,7 +22,18 @@ struct particle_t particles[MAX_PARTICLES];
  *
  * 0x2000 - 0x2FFF - SPECTRANET PAGE B:
  * common arrays, see below
+ *
+ * 0xFF01 - 0xFFF4 - fixed high-memory buffers:
+ * 0xFF01 - 0xFF40 - alert_text_data
+ * 0xFF41 - 0xFF80 - send_buffer
+ * 0xFF81 - 0xFFE0 - particles
+ * 0xFFE1 - 0xFFF4 - my_default_state
  */
+
+__at(0xFF01) char alert_text_data[64];
+__at(0xFF41) char send_buffer[64];
+__at(0xFF81) struct particle_t particles[MAX_PARTICLES];
+__at(0xFFE1) char my_default_state[20];
 
 __at(0x2000) uint8_t proto_buffer_b[2048];
 __at(0x2800) struct client_map_t client_map_b;

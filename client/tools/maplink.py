@@ -10,6 +10,15 @@ with open(map_file, "r") as f:
     map_file_lines = f.readlines()
 
 symbols = {}
+double_underscore_allowlist = [
+    "__button_event",
+    "__button_render",
+    "__edit_event",
+    "__edit_render",
+    "__label_render",
+    "__select_event",
+    "__select_render",
+]
 
 for line in map_file_lines:
     m = address_symbol.match(line)
@@ -20,7 +29,7 @@ for line in map_file_lines:
     symbol_type = m.group(3)
     if symbol_name.startswith("i_"):
         continue
-    if symbol_name.startswith("__"):
+    if symbol_name.startswith("__") and symbol_name not in double_underscore_allowlist:
         continue
     if symbol_name in ["_module_action", "_module_loop", "_module_interrupt"]:
         continue

@@ -46,7 +46,6 @@ uint8_t hit_delay = 0;
 uint8_t hit_latch = 0;
 uint8_t got_tiles = 0;
 static uint8_t i_;
-char my_default_state[20] = {};
 char my_building_state[20] = {};
 
 static uint8_t* get_selection_attr()
@@ -844,9 +843,32 @@ static void check_module_loop()
 {
     if (module_loop_active != 0xFF)
     {
-        // module_loop_active would contain namespace
-        setpagea(SPECTRANET_MODULES_NAMESPACE0);
+        module_call_namespace = module_loop_active;
+        setpagea(SPECTRANET_MODULES_NAMESPACE0 + module_loop_active);
         module_loop();
+        get_objects_a();
+    }
+}
+
+static void check_gui_scene_iteration()
+{
+    if (current_scene_module != MODULE_NONE)
+    {
+        if (current_scene == NULL)
+        {
+            current_scene_module = MODULE_NONE;
+            return;
+        }
+
+        module_call_namespace = current_scene_module;
+        setpagea(SPECTRANET_MODULES_NAMESPACE0 + current_scene_module);
+        zxgui_scene_iteration();
+        get_objects_a();
+        client_map_get_b();
+    }
+    else
+    {
+        zxgui_scene_iteration();
     }
 }
 
@@ -867,13 +889,13 @@ static void loop_state_none()
 
         if (unique_frame || current_scene)
         {
-            zxgui_scene_iteration();
+            check_gui_scene_iteration();
         }
 
         if (state_active_phase)
         {
             update_target_marker();
-            zxgui_scene_set(NULL);
+            module_scene_clear();
             zxgui_clear();
             if (my_player_object)
             {
@@ -903,7 +925,7 @@ static void loop_active_phase()
             switch_tile_data_a();
             client_map_get_b();
 
-            zxgui_scene_iteration();
+            check_gui_scene_iteration();
 
             if (module_music_active)
             {

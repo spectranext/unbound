@@ -25,8 +25,22 @@ uint8_t unique_frame = 0;
 uint8_t module_loop_active = 0xFF;
 uint8_t module_interrupt_active = 0xFF;
 uint8_t module_music_active = 0;
+uint8_t current_scene_module = MODULE_NONE;
+uint8_t module_call_namespace = 0;
 
 extern void isr_handler();
+
+void module_scene_set(struct gui_scene_t* scene) __z88dk_fastcall
+{
+    current_scene_module = module_call_namespace;
+    zxgui_scene_set(scene);
+}
+
+void module_scene_clear()
+{
+    current_scene_module = MODULE_NONE;
+    zxgui_scene_set(NULL);
+}
 
 static void install_isr()
 {
@@ -34,16 +48,15 @@ static void install_isr()
 
 #ifndef __CLION_IDE__
 #asm
-    // set the table to 0x6000
-    ld a, 0x5B
+    ld a, 0xFE
     ld i, a
     im 2
 #endasm
 #endif
 
-    memset((void *) 0x5B00, 0x5C, 257);
-    *(uint8_t*)0x5C5C = 0xC3;
-    *(uint16_t*)0x5C5D = (uint16_t*)isr_handler;
+    memset((void*)0xFE00, 0xFD, 257);
+    *(uint8_t*)0xFDFD = 0xC3;
+    *(uint16_t*)0xFDFE = (uint16_t)isr_handler;
     intrinsic_ei();
 }
 
@@ -76,6 +89,7 @@ int main()
 
     init_particles();
     init_hud();
+    my_default_state[0] = 0;
 
     client_map_init();
     proto_init(proto_buffer_b, sizeof(proto_buffer_b));

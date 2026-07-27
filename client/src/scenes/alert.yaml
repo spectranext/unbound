@@ -5,7 +5,6 @@ scenes:
       type: label
       boundaries: 5, 9, 24, 4
       buffer: alert_text_data
-      buffer_size: 64
       color: INK_YELLOW | BRIGHT | PAPER_BLACK
       flags: GUI_FLAG_MULTILINE
     - name: connect_btn

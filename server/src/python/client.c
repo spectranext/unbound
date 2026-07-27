@@ -169,41 +169,6 @@ PyObject* client_api_module_action_cb(PyObject *callable, PyObject *args, PyObje
     Py_RETURN_NONE;
 }
 
-PyObject* client_api_force_query_cb(PyObject *callable, PyObject *args, PyObject *kwargs)
-{
-    CLIENT_API_STATE_OR_NONE();
-
-    PyObject* query_response = PyTuple_GetItem(args, 0);
-
-    if (query_response == Py_None)
-    {
-        struct player_query_result ignored_result;
-        server_python_player_force_query(&client_state->state->server_python,
-                                         client_state, query_response, &ignored_result);
-
-        uint8_t command = MSG_FORCE_QUERY_RESULT;
-        uint8_t close = 1;
-        declare_arg_property_on_stack(_close, 'z', close, NULL);
-        declare_arg_property_on_stack(id, OBJ_PROPERTY_ID, command, &_close);
-        client_state_send_proto_one_object(client_state->state, client_state, &id);
-        server_python_client_set_object_state_default(client_state);
-        Py_RETURN_NONE;
-    }
-
-    struct player_query_result generated_result;
-    if (server_python_player_force_query(&client_state->state->server_python,
-                                         client_state, query_response, &generated_result))
-    {
-        Py_RETURN_NONE;
-    }
-
-    server_state_client_force_query_result(client_state, client_state->state, &generated_result);
-    server_python_player_free_query_result(&generated_result);
-    server_python_client_set_object_state(client_state, OBJECT_STATE_CONTROL);
-
-    Py_RETURN_NONE;
-}
-
 PyObject* client_api_force_watch_cb(PyObject *callable, PyObject *args, PyObject *kwargs)
 {
     CLIENT_API_STATE_OR_NONE();
