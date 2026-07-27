@@ -9,11 +9,24 @@ void init_query()
 {
 }
 
+static uint8_t switch_query_pending = 0;
+
+void switch_query_reset()
+{
+    switch_query_pending = 0;
+}
+
 void switch_query(const char* query) __z88dk_fastcall
 {
+    if (switch_query_pending)
+    {
+        return;
+    }
+
     declare_str_property_on_stack(req_id, OBJ_PROPERTY_ID, MSG_QUERY, NULL);
     declare_str_property_on_stack(version, 'q', query, &req_id);
     declare_object_on_stack(request, 128, &version);
 
     proto_send_one_nf(request);
+    switch_query_pending = 1;
 }

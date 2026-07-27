@@ -13,5 +13,6 @@ extern void switch_alert(const char* progress_message);
 extern void switch_chat();
 extern void switch_terminal();
 extern void switch_query(const char* query) __z88dk_fastcall;
+extern void switch_query_reset();
 
 #endif

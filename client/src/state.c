@@ -262,6 +262,8 @@ static void update_move_controls()
         return;
     }
 
+    switch_query_reset();
+
     if ((row & KEY_BIT_Q) == 0)
     {
         move_up();
