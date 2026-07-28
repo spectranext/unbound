@@ -56,9 +56,11 @@ class DelayedObjectRemoval(PostponedTouch):
             self.old_block.toucher = self.player
             if self.block_to_obtain.credits:
                 self.player.get_team().add_credits(self.block_to_obtain.credits)
-                self.player.get_client().queue_notify(
-                    "+{0} credits".format(self.block_to_obtain.credits).encode(),
-                    ClientAPI.NOTIFY_MESSAGE_COLOR_REGULAR, "new_credits")
+                client = self.player.get_client()
+                if client:
+                    client.queue_notify(
+                        "+{0} credits".format(self.block_to_obtain.credits).encode(),
+                        ClientAPI.NOTIFY_MESSAGE_COLOR_REGULAR, "new_credits")
             else:
                 self.player.add_to_inventory(self.block_to_obtain, 1, 1.)
             new_b = BlockObject(0, NOTHING)
@@ -143,9 +145,11 @@ def touch(p: ObjectAPI, x: int, y: int) -> Union[None, PostponedTouch]:
         b.toucher = p
         if remove_block.credits:
             p.get_team().add_credits(remove_block.credits)
-            p.get_client().queue_notify(
-                "+{0} credits".format(remove_block.credits).encode(),
-                ClientAPI.NOTIFY_MESSAGE_COLOR_REGULAR, "new_credits")
+            client = p.get_client()
+            if client:
+                client.queue_notify(
+                    "+{0} credits".format(remove_block.credits).encode(),
+                    ClientAPI.NOTIFY_MESSAGE_COLOR_REGULAR, "new_credits")
         else:
             p.add_to_inventory(remove_block, 1, 1.)
         new_b = BlockObject(0, NOTHING)
