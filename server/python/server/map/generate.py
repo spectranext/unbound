@@ -728,8 +728,8 @@ def generate_objects(server_map: MapAPI):
     need_cobwebs = map_width // 2
     need_rocks = map_width // 12
     need_spikes = map_width // 64
-    need_popstones = map_width // 2
-    need_spidernests = max(1, map_width // 12)
+    need_popstones = map_width // 20
+    need_spidernests = max(1, map_width // 20)
 
     flower = items.get("flower")
     spike = items.get("spike")
@@ -756,9 +756,11 @@ def generate_objects(server_map: MapAPI):
 
         def is_open_block(x_: int, y_: int) -> bool:
             block = server_map.get_block(x_, y_)
-            return bool(block is not None and not block.code)
+            return bool(block is not None and not block.blocking())
 
         def has_open_hazard_space(x_: int, floor_y_: int, clearance_height: int = 3) -> bool:
+            if x_ < 2 or x_ + 2 >= map_width - 1:
+                return False
             if floor_y_ < clearance_height or floor_y_ >= server_map.get_height():
                 return False
 
@@ -779,6 +781,82 @@ def generate_objects(server_map: MapAPI):
                     return False
             return True
 
+        def has_open_chamber_space(
+                x_: int,
+                floor_y_: int,
+                clearance_height: int = 6,
+                min_open_cells: int = 18,
+                min_horizontal_run: int = 5,
+                min_horizontal_rows: int = 2) -> bool:
+            min_x = max(1, x_ - 3)
+            max_x = min(map_width - 2, x_ + 4)
+            min_y = max(0, floor_y_ - clearance_height)
+            max_y = floor_y_ - 1
+            open_cells: Set[Tuple[int, int]] = set()
+
+            for yy in range(min_y, max_y + 1):
+                for xx in range(min_x, max_x + 1):
+                    if is_open_block(xx, yy):
+                        open_cells.add((xx, yy))
+
+            seeds = [
+                (xx, yy)
+                for xx in range(x_, x_ + 2)
+                for yy in range(min_y, max_y + 1)
+                if (xx, yy) in open_cells
+            ]
+            if not seeds:
+                return False
+
+            connected: Set[Tuple[int, int]] = set()
+            stack = [seeds[0]]
+            connected.add(seeds[0])
+            while stack:
+                cx, cy = stack.pop()
+                for neighbor in ((cx + 1, cy), (cx - 1, cy), (cx, cy + 1), (cx, cy - 1)):
+                    if neighbor in open_cells and neighbor not in connected:
+                        connected.add(neighbor)
+                        stack.append(neighbor)
+
+            if len(connected) < min_open_cells:
+                return False
+
+            horizontal_rows = 0
+            for yy in range(min_y, max_y + 1):
+                run = 0
+                for xx in range(min_x, max_x + 1):
+                    if (xx, yy) in connected:
+                        run += 1
+                        if run >= min_horizontal_run:
+                            horizontal_rows += 1
+                            break
+                    else:
+                        run = 0
+
+            return horizontal_rows >= min_horizontal_rows
+
+        def has_open_spidernest_space(x_: int, y_: int) -> bool:
+            floor_y_ = y_ + 1
+            if not has_open_hazard_space(x_, floor_y_, clearance_height=6):
+                return False
+            if not has_open_chamber_space(x_, floor_y_):
+                return False
+
+            for yy in range(y_ - spidernest.height + 1, y_ + 1):
+                for xx in range(x_, x_ + spidernest.width):
+                    if not is_open_block(xx, yy):
+                        return False
+
+            for xx in range(x_ - 1, x_ + spidernest.width + 1):
+                if not is_open_block(xx, y_ - spidernest.height):
+                    return False
+
+            for yy in range(y_ - spidernest.height, y_ + 1):
+                if is_open_block(x_ - 1, yy) or is_open_block(x_ + spidernest.width, yy):
+                    return True
+
+            return False
+
         def project_open_space_to_floor(x_: int, open_y: int) -> Optional[int]:
             y_ = open_y
             while y_ < server_map.get_height():
@@ -791,7 +869,7 @@ def generate_objects(server_map: MapAPI):
                 y_ += 1
             return None
 
-        for x in range(1, map_width - 2):
+        for x in range(2, map_width - 3):
             min_y = max(top_heights[x], top_heights[x + 1]) + CAVE_SURFACE_BUFFER
             for y in range(max(0, min_y), server_map.get_height() - 1):
                 if not is_open_block(x, y) or not is_open_block(x + 1, y):
@@ -809,7 +887,7 @@ def generate_objects(server_map: MapAPI):
         for x, y in spidernest_candidates:
             if spidernests_placed >= need_spidernests:
                 break
-            if not has_open_hazard_space(x, y + 1, clearance_height=6):
+            if not has_open_spidernest_space(x, y):
                 continue
             if any((xx, yy) in occupied_hazard_cells for yy in range(y - 1, y + 1) for xx in range(x, x + 2)):
                 continue
@@ -819,8 +897,8 @@ def generate_objects(server_map: MapAPI):
             bi = spawn_base(spidernest, x, y, None)
             bi.tag = server_map.allocate_tag()
             bi.on_init()
-            for yy in range(y - 1, y + 1):
-                for xx in range(x, x + 2):
+            for yy in range(y - 4, y + 1):
+                for xx in range(x - 2, x + 4):
                     occupied_hazard_cells.add((xx, yy))
             spidernests_placed += 1
 
