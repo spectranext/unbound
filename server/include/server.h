@@ -69,6 +69,10 @@ struct server_main_thread_runnable_args
                 } hit;
                 struct
                 {
+                    uint8_t blocked;
+                } ui_blocked;
+                struct
+                {
                     uint16_t angle;
                 } aim;
             };

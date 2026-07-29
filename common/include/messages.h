@@ -138,5 +138,6 @@ struct PACKED__ MSG_MOVE_OBJ_t
 #define MSG_ACTION              "ac"
 #define MSG_DOWNLOAD            "dw"
 #define MSG_CLIENT_BINARY       "bi"
+#define MSG_UI_BLOCKED          "ub"
 
 #endif

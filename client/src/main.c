@@ -81,9 +81,6 @@ int main()
     zxgui_clear();
 
     // scenes
-#ifndef DEBUG
-    init_chat();
-#endif
     init_terminal();
     init_query();
 

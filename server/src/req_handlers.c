@@ -32,6 +32,7 @@ void register_server_handlers(struct server_state_t* state)
     server_handle_request(state, MSG_ACTION, req_handle_action);
     server_handle_request(state, MSG_DOWNLOAD, req_handle_download);
     server_handle_request(state, MSG_CLIENT_BINARY, req_handle_client_binary);
+    server_handle_request(state, MSG_UI_BLOCKED, req_handle_ui_blocked);
 }
 
 static void free_client_state_recv_objects(struct client_state_t* client_state)

@@ -41,5 +41,6 @@ extern const char* req_handle_aim(struct client_state_t* state, struct request_h
 extern const char* req_handle_action(struct client_state_t* state, struct request_handler_response_chain_t** response);
 extern const char* req_handle_download(struct client_state_t* state, struct request_handler_response_chain_t** response);
 extern const char* req_handle_client_binary(struct client_state_t* state, struct request_handler_response_chain_t** response);
+extern const char* req_handle_ui_blocked(struct client_state_t* state, struct request_handler_response_chain_t** response);
 
 #endif

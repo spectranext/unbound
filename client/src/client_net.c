@@ -335,6 +335,18 @@ static void client_message_set_object_client_id(ProtoObject* object) __z88dk_fas
     struct map_client_object_t* oo = &map_objects[object_slot];
     oo->object.client_id = client_id;
 
+    if (oo == my_player_object && client_id != my_client_id)
+    {
+        client_set_my_control_object(NULL);
+        update_target_marker();
+        return;
+    }
+
+    if ((oo->object.f0 & OBJECT_F0_USED) == 0)
+    {
+        return;
+    }
+
     if (client_id == my_client_id)
     {
         client_set_my_control_object(oo);
@@ -359,6 +371,12 @@ static void client_message_sync_obj(ProtoObject* object) __z88dk_fastcall
     oo->prediction_ready = 0;
     oo->prediction_offset = 0xFF;
     ProtoObjectProperty* p = find_property(object, '_');
+
+    if (p == NULL || p->value_size < MAP_OBJECT_SYNC_CRITICAL_SIZE)
+    {
+        return;
+    }
+
     memcpy(&o->object_id, p->value, p->value_size);
 
     o->f0 = OBJECT_F0_DIRTY | OBJECT_F0_USED | OBJECT_F0_LOOKING_LEFT;

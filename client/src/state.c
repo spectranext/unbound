@@ -334,7 +334,6 @@ static void update_move_controls()
     if ((row & KEY_BIT_C) == 0)
     {
         // soundfx(FX_ITEM_6);
-        panel_open();
         switch_chat();
         return;
     }

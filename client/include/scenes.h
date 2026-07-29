@@ -4,7 +4,6 @@
 #include <proto.h>
 #include <proto_objects.h>
 
-extern void init_chat();
 extern void init_terminal();
 extern void init_query();
 extern void char_msg(const char* msg, uint16_t len) __z88dk_fastcall;

@@ -129,18 +129,18 @@ class ClientAPI(object):
         if not self.music_enabled:
             return
 
-        # trigger to play music after it is done
-        self.handle_action_once(b"music", self.play_playlist)
-
         def do_play():
             if not self._music_list:
                 def is_music(name: bytes):
                     return name.startswith(b"MUSIC_")
                 self._music_list = list(filter(is_music, self.list_modules()))
                 random.shuffle(self._music_list)
-            music = self._music_list.pop()
-            if music is None:
+            if not self._music_list:
+                MapAPI.instance.print("No music modules available for playlist")
                 return
+            music = self._music_list.pop()
+            # trigger to play music after it is done
+            self.handle_action_once(b"music", self.play_playlist)
             self.play_music(music)
 
         if self._music_name:

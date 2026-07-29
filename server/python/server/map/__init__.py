@@ -154,7 +154,7 @@ class ServerMap(MapAPI):
         for client in self.query_clients():
             client.send_chat_message(full_message)
             if client != author:
-                client.notify(full_message, ClientAPI.NOTIFY_MESSAGE_COLOR_REGULAR)
+                client.queue_notify(full_message, ClientAPI.NOTIFY_MESSAGE_COLOR_REGULAR)
 
         from ..http.web_chat import publish_chat_message_to_web
 
