@@ -364,6 +364,7 @@ struct client_state_t
     ProtoObject* receiving_objects[MAX_RECEIVING_OBJECTS];
     pthread_mutex_t proto_send_jobs_mutex;
     struct client_proto_send_job_t* proto_send_jobs;
+    char loaded_module_names[SERVER_DATA_MODULE_NAMESPACE_COUNT][SERVER_DATA_MODULE_NAME_SIZE];
     uint16_t synced_objects[MAX_CLIENT_CACHED_OBJECTS];
     uint8_t synced_chunks[CLIENT_MAX_SYNCED_CHUNKS];
     PyObject* py_postponed_touch;

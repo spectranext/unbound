@@ -206,8 +206,13 @@ static void client_module(ProtoObject* object) __z88dk_fastcall
 {
     // ignore for now
     uint8_t namespace = get_uint8_property(object, 'n', 0);
+    if (namespace >= MODULE_NAMESPACE_COUNT)
+        return;
+
     uint16_t offset = get_uint16_property(object, 'o', 0);
     ProtoObjectProperty* payload = find_property(object, 'p');
+    if (payload == NULL)
+        return;
 
     uint8_t* ptr = (uint8_t*)0x1000;
     ptr += offset;
@@ -216,6 +221,7 @@ static void client_module(ProtoObject* object) __z88dk_fastcall
     setpagea(SPECTRANET_MODULES_NAMESPACE0 + namespace);
     memcpy(ptr, payload->value, payload->value_size);
     get_objects_a();
+    module_loaded[namespace] = 1;
     intrinsic_ei();
 }
 
@@ -557,6 +563,9 @@ static void client_module_action(ProtoObject* object) __z88dk_fastcall
         case NAMESPACE_CODE:
         default:
         {
+            if (namespace >= MODULE_NAMESPACE_COUNT || module_loaded[namespace] == 0)
+                break;
+
             module_call_namespace = namespace;
             setpagea(SPECTRANET_MODULES_NAMESPACE0 + namespace);
             module_action(object);

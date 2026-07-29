@@ -6,6 +6,9 @@
 #include <ut/uthash.h>
 #include "Python.h"
 
+#define SERVER_DATA_MODULE_NAMESPACE_COUNT 4
+#define SERVER_DATA_MODULE_NAME_SIZE 32
+
 enum server_data_kv_type_t
 {
     SERVER_KV_UNKNOWN = 0,

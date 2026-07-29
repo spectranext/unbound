@@ -27,6 +27,7 @@ uint8_t module_interrupt_active = 0xFF;
 uint8_t module_music_active = 0;
 uint8_t current_scene_module = MODULE_NONE;
 uint8_t module_call_namespace = 0;
+uint8_t module_loaded[MODULE_NAMESPACE_COUNT] = {};
 
 extern void isr_handler();
 

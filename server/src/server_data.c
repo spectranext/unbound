@@ -259,10 +259,14 @@ static void server_data_push_module_namespace(struct client_state_t* client_stat
         return;
 
     uint8_t namespace = namespace_p->as_int;
+    if (namespace >= SERVER_DATA_MODULE_NAMESPACE_COUNT)
+        return;
 
     uint16_t max_chunk_size = 1600;
 
     client_printf(client_state, "pushing namespace %s (%d)\n", namespace_name, namespace);
+    strncpy(client_state->loaded_module_names[namespace], data_entry->name, SERVER_DATA_MODULE_NAME_SIZE - 1);
+    client_state->loaded_module_names[namespace][SERVER_DATA_MODULE_NAME_SIZE - 1] = 0;
 
     declare_arg_property_on_stack(_namespace, 'n', namespace, NULL);
     uint8_t command = MSG_MODULE;
@@ -344,6 +348,15 @@ void server_data_module_action(struct client_state_t* client_state, const char* 
         return;
 
     uint8_t namespace = namespace_p->as_int;
+    if (namespace >= SERVER_DATA_MODULE_NAMESPACE_COUNT)
+        return;
+
+    if (strcmp(client_state->loaded_module_names[namespace], name) != 0)
+    {
+        client_printf(client_state, "ignoring module action %s: namespace %d has %s loaded\n",
+            name, namespace, client_state->loaded_module_names[namespace]);
+        return;
+    }
 
     declare_arg_property_on_stack(_namespace, 'n', namespace, NULL);
     uint8_t command = MSG_MODULE_ACTION;

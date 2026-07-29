@@ -49,9 +49,11 @@ class QuerySession:
         self._replace(response)
 
     def _replace(self, response: Optional[QueryResponse]):
+        previous = self.current
         self.current = response
         if response is None:
-            self._close()
+            if previous is not None:
+                self._close()
         else:
             self._open(response)
 
