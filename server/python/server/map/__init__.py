@@ -150,8 +150,23 @@ class ServerMap(MapAPI):
 
     def on_chat_message(self, author: ClientAPI, message: bytes):
         full_message = b"%b: %b" % (author.get_name(), message)
+        author_name = author.get_name().decode("utf-8", errors="replace")
+        message_text = message.decode("utf-8", errors="replace")
+        clients = self.query_clients()
 
-        for client in self.query_clients():
+        self.print(
+            "chat: received from {0} ({1} clients): {2}".format(
+                author_name, len(clients), message_text))
+
+        for client in clients:
+            client_name = client.get_name().decode("utf-8", errors="replace")
+            blocked_notifications = ",".join(
+                b.decode("utf-8", errors="replace")
+                for b in getattr(client, "blocked_notifications", set())
+            )
+            self.print(
+                "chat: sending to {0} client_id={1} notify_blocked=[{2}]".format(
+                    client_name, client.client_id, blocked_notifications))
             client.send_chat_message(full_message)
             if client != author:
                 client.queue_notify(full_message, ClientAPI.NOTIFY_MESSAGE_COLOR_REGULAR)

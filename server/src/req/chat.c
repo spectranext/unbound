@@ -25,10 +25,12 @@ const char* req_handle_chat(struct client_state_t* state, struct request_handler
     }
 
     char* msg = copy_str_property(message);
-    struct server_main_thread_runnable_args post_args;
+    struct server_main_thread_runnable_args post_args = {0};
     post_args.state = state;
     post_args.response = response;
-    strncpy(post_args.chat.message, msg, sizeof(post_args.chat.message));
+    strncpy(post_args.chat.message, msg, sizeof(post_args.chat.message) - 1);
+    server_printf("chat: request from client_id=%d user=%s message=%s\n",
+        state->client_id, state->user_name, post_args.chat.message);
     free(msg);
     return server_state_post_runnable_wait(state->state, req_handle_chat_main_thread, post_args, &state->post_wait);
 }

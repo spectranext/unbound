@@ -3,6 +3,9 @@
 #include "messages.h"
 #include "utils.h"
 #include <sys/socket.h>
+#include <string.h>
+
+#define CLIENT_CHAT_MESSAGE_SIZE 64
 
 static struct client_state_t* client_api_get_state(PyObject* callable)
 {
@@ -49,11 +52,23 @@ PyObject* client_api_sync_stats_cb(PyObject *callable, PyObject *args, PyObject 
 PyObject* client_api_send_chat_message_cb(PyObject *callable, PyObject *args, PyObject *kwargs)
 {
     CLIENT_API_STATE_OR_NONE();
-    const char* msg = PyBytes_AS_STRING(PyTuple_GetItem(args, 0));
+    PyObject* msg_bytes = PyTuple_GetItem(args, 0);
+    const char* msg = PyBytes_AS_STRING(msg_bytes);
+    Py_ssize_t msg_size = PyBytes_GET_SIZE(msg_bytes);
+    char bounded_msg[CLIENT_CHAT_MESSAGE_SIZE];
 
-    declare_str_property_on_stack(_m, 'm', msg, NULL);
+    if (msg_size >= CLIENT_CHAT_MESSAGE_SIZE)
+    {
+        msg_size = CLIENT_CHAT_MESSAGE_SIZE - 1;
+    }
+    memcpy(bounded_msg, msg, msg_size);
+    bounded_msg[msg_size] = '\0';
+
+    declare_str_property_on_stack(_m, 'm', bounded_msg, NULL);
     uint8_t command = MSG_CHAT;
     declare_arg_property_on_stack(id, OBJ_PROPERTY_ID, command, &_m);
+    server_printf("chat: queue send to client_id=%d user=%s message=%s\n",
+        client_state->client_id, client_state->user_name, bounded_msg);
     client_state_send_proto_one_object(client_state->state, client_state, &id);
     Py_RETURN_NONE;
 }

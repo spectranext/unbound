@@ -65,6 +65,12 @@ static void send_msg()
 void char_msg(const char* msg, uint16_t len) __z88dk_fastcall
 {
     char* dest = client_map_b.chat_messages[msg_index++].msg;
+    uint16_t max_len = sizeof(client_map_b.chat_messages[0].msg) - 1;
+
+    if (len > max_len)
+    {
+        len = max_len;
+    }
 
     if (msg_index >= MAX_MESSAGES)
     {

@@ -5,6 +5,9 @@
 
 const char* req_handle_ui_blocked_main_thread(struct server_main_thread_runnable_args* args)
 {
+    server_printf("ui: client_id=%d user=%s blocked=%d\n",
+        args->state->client_id, args->state->user_name, args->ui_blocked.blocked);
+
     if (args->ui_blocked.blocked)
     {
         server_python_block_notifications(&args->state->state->server_python, args->state, "ui");
