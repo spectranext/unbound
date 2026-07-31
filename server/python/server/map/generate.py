@@ -617,6 +617,8 @@ def generate_map(server_map: MapAPI, scenario: bytes):
     random.seed(None)
 
     sc = get_scenario(scenario)
+    from .. team import configure_teams_for_scenario
+    configure_teams_for_scenario(sc)
     map_width = server_map.get_width()
     map_height = server_map.get_height()
     server_map.print("generating a new map {0}x{1}...".format(map_width, map_height))

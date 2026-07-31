@@ -461,3 +461,7 @@ def find_team(identity: bytes) -> Optional[Team]:
 TEAM_A = Team(loc.TEAM_COALITION, 0.25, icons.ICON_TEAM_1, 1)
 TEAM_B = Team(loc.TEAM_RONIN, 0.75, icons.ICON_TEAM_2, 2)
 TEAMS: List[Team] = [TEAM_A, TEAM_B]
+
+
+def configure_teams_for_scenario(scenario):
+    TEAMS[:] = [TEAM_A, TEAM_B] if scenario.second_team else [TEAM_A]

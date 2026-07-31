@@ -5,7 +5,7 @@ class Scenario(object):
     def __init__(self, spawn_immediately: bool, map_wave_a: float, map_wave_b: float, trees: bool, light: bool,
                  auto_login: bool, respawn: bool, seconds_in_a_day: int, bots: bool, reward_screen: bool,
                  tutorial: bool, map_width_chunks: Optional[int] = None, bank_fees: bool = True,
-                 bank_start_bonus: int = 0):
+                 bank_start_bonus: int = 0, second_team: bool = True):
         self.spawn_immediately = spawn_immediately
         self.map_wave_a = map_wave_a
         self.map_wave_b = map_wave_b
@@ -20,6 +20,7 @@ class Scenario(object):
         self.map_width_chunks = map_width_chunks
         self.bank_fees = bank_fees
         self.bank_start_bonus = bank_start_bonus
+        self.second_team = second_team
 
 wave_a = 6
 wave_b = 4
@@ -53,7 +54,7 @@ SCENARIOS: Dict[str, Scenario] = {
         False, True, 480, True, False, False),
     "demo": Scenario(
         True, wave_a, wave_b, True, True,
-        True, True, 480, True, False, False, bank_fees=False, bank_start_bonus=10000),
+        True, True, 480, True, False, False, bank_fees=False, bank_start_bonus=10000, second_team=False),
 }
 
 

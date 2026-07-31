@@ -172,8 +172,10 @@ def init_map(server_map: MapAPI, scenario: bytes):
     from .. newclient import new_client
     from .. http.server import start_http_server, start_reporter
     from .. scenarios import get_scenario
+    from .. team import configure_teams_for_scenario
     server_map.scenario = scenario
     server_map.scenario_obj = get_scenario(scenario)
+    configure_teams_for_scenario(server_map.scenario_obj)
     server_map.set_new_client_callback(new_client)
     start_http_server()
     start_reporter()
