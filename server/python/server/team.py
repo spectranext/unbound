@@ -116,7 +116,10 @@ class Team(object):
 
     def init(self):
         from . contract.list import CONTRACTS
+        from . scenarios import get_scenario
 
+        scenario = MapAPI.instance.scenario_obj or get_scenario(MapAPI.instance.scenario)
+        self.credits = Tuning.INITIAL_CREDITS + scenario.bank_start_bonus
         self.set_contract(CONTRACTS[0])
 
     def add_credits(self, c: int):
@@ -206,7 +209,11 @@ class Team(object):
 
     def update(self):
         if self.financial_cycle_started:
-            self.debt.cycle()
+            from . scenarios import get_scenario
+
+            scenario = MapAPI.instance.scenario_obj or get_scenario(MapAPI.instance.scenario)
+            if scenario.bank_fees:
+                self.debt.cycle()
 
             self.cnt += 1
             if self.cnt % Team.CREDIT_HISTORY_ITERATION == 0:
