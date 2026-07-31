@@ -189,7 +189,7 @@ PyObject* server_map_api_query_clients_cb(PyObject *callable, PyObject *args, Py
 
     struct client_state_t* object;
     struct client_state_t* tmp;
-    HASH_ITER(hh_id, server_state->client_states_ids, object, tmp)
+    LL_FOREACH_SAFE(server_state->client_states, object, tmp)
     {
         if (object->client_id == 0)
             continue;
@@ -200,7 +200,7 @@ PyObject* server_map_api_query_clients_cb(PyObject *callable, PyObject *args, Py
 
     Py_ssize_t index = 0;
 
-    HASH_ITER(hh_id, server_state->client_states_ids, object, tmp)
+    LL_FOREACH_SAFE(server_state->client_states, object, tmp)
     {
         if (object->client_id == 0)
             continue;

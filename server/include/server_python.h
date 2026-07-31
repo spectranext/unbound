@@ -156,6 +156,7 @@ typedef struct {
 typedef struct {
     PyObject_HEAD
     struct server_state_t* server_state;
+    struct client_state_t* client_state;
     uint16_t client_id;
 } client_pyton_obj;
 
@@ -356,6 +357,7 @@ PyObject* object_api_get_id_cb(PyObject *callable, PyObject *args, PyObject *kwa
 
 #define ASSIGN_CLIENT_CALLBACK(client_state_arg, cb_name, type, inttype) { inttype* cb = PyObject_New(inttype, &type); \
     cb->server_state = client_state_arg->state; \
+    cb->client_state = client_state_arg; \
     cb->client_id = client_state_arg->client_id; \
     if (PyObject_SetAttrString(client_state_arg->py, cb_name, &cb->ob_base)) \
     { \

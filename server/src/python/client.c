@@ -10,6 +10,10 @@
 static struct client_state_t* client_api_get_state(PyObject* callable)
 {
     client_pyton_obj* obj = (client_pyton_obj*)callable;
+    if (obj->client_state)
+    {
+        return obj->client_state;
+    }
     if (obj->server_state == NULL)
     {
         return NULL;
