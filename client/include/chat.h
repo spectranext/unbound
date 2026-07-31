@@ -4,9 +4,10 @@
 #include "zxgui.h"
 
 #define MAX_MESSAGES (4)
+#define MAX_MESSAGE_LENGTH (64)
 
 struct chat_message_t {
-    char msg[64];
+    char msg[MAX_MESSAGE_LENGTH];
     struct gui_label_t label;
 };
 
